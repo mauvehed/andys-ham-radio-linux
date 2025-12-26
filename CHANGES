@@ -1,0 +1,718 @@
+CHANGES
+=======
+
+If this file looks improperly spaced, choose a fixed width font.
+
+For versions up to and including version 25b:
+  The ISO file is named andy-vNN-64bit.iso, where NN is a version designation.
+
+Starting with version 26:
+  The TAR file is named andy-vNN.tar.gz where NN is a version designation.
+
+Version 26e - November 2025
+  - added RTL_SDR Blog V4 driver
+  - added QLog 0.46.2
+  - added wsjtx_improved 3.0.0
+  - removed DroidStar
+  - removed nanovna-saver
+  - removed noaa-apt
+  - updated chirp 20251108
+  - updated Coil64 2.3.37
+  - updated cty.dat (cty-3536) (VER20251111)
+  - updated direwolf 1.8
+  - updated gqrx 2.17.7
+  - updated ESPHamClock 4.21
+  - updated flcluster 1.1.01
+  - updated fldigi 4.2.09
+  - updated fllog 1.2.9
+  - updated flrig 2.0.09
+  - updated freedv 2.1.0
+  - updated GridTracker2 2.20250914.1
+  - updated js8spotter 1.17
+  - updated MorseRunner 1.85.3
+  - updated MSHV 2.76.3
+  - updated QtTinySA 1.2.2
+  - updated quisk 4.2.46
+  - updated tqsl 2.8.2
+  - updated wfview 2.11
+
+Version 26d - April 2025
+  - added check_network() to install_ahrl
+  - added curl
+  - added js8spotter
+  - added qttinysa
+  - added support for LMDE 6 (Linux Mint Debian Edition)
+  - cleanup old menu files
+  - removed gresistor
+  - updated antscope2 1.4.5
+  - updated chirp 20250404
+  - updated Coil64 2.2.34
+  - updated cty.dat (cty-3512) (VER20250422)
+  - updated ESPHamClock 4.16
+  - updated fldigi 4.2.06
+  - updated flrig 2.0.05
+  - updated GridTracker2 2.250421.1
+  - updated M17 mvoice 1.2.0
+  - updated MSHV 2.76.1
+  - updated Morse Runner 1.85.1
+  - updated quisk 4.2.41
+  - updated SDR++ 1.2.1 (03-Apr-2025)
+  - updated wfview 2.03
+  - update wsjtx 2.7.0
+ 
+Version 26c - January 2025
+  - removed M17 droidstar (needs QT>= 6.5, ubuntu = 6.4)
+  - updated antscope2 1.4.4
+  - updated ardop 1.0.4.1.3
+  - updated chirp 20250117
+  - updated Coil64 2.2.33
+  - updated cty.dat (cty-3503) (VER20250115)
+  - updated freedv 1.9.9.2
+  - updated ESPHamClock 4.12
+  - updated GridTracker2 2.250101.1
+  - updated M17 mvoice 1.1.4
+  - updated MSHV 2.75
+  - updated nanovna-saver 0.6.8
+  - updated not1mm 25.1.6
+  - updated SatDump 1.2.2 (02Jan2025)
+  - updated tqsl 2.7.5
+  - updated yaac 1.0-beta205(30-Dec-2024)
+  
+Version 26b-beta - October 2024
+  - added several programs for the ARRL Teachers Institute
+    - added AIS-catcher
+    - added notepadqq 2.0.0-beta+git
+    - added putty 0.81
+    - added SatDump 1.2.1 (26Sept2024)
+    - added SDR++ 1.2.0 (29Sept2024)
+    - added Virtual Radar Server 2.4.4
+    - added yaac 1.0-beta202
+    
+  - added /usr/local/share/docs/Andy_Ham_Radio_Linux/SOFTWARE - list of ham radio programs
+  - added /usr/local/share/ahrl/backdrops - screen backgrounds
+  - added M17 droidstar
+  - added M17 mvoice
+  - added not1mm
+  
+  - reduced NUM_CPUS to 1 in install_ahrl
+  - required memory is now 2GB (reduced from 8GB)
+
+  - updated chirp 20240926
+  - updated cty.dat (cty-3434) (VER20240927)
+  - updated GridTracker 1.24.0922
+  - updated xlog 2.0.25
+  
+Version 26a - August 2024
+  - fixed country_files install bug
+  - fixed dream source build
+  - fixed gspiceui source build
+  - fixed issues exposed by Linux Mint 22 (Cinnamon)
+  
+  - installing glfer 0.4.2 from source
+  - installing jtdx from repo (not deb file)
+
+  - purge snap firefox, add Mozilla repository and firefox
+
+  - removed dillo
+  - removed gerbv (replaced with KiCad version)
+  - removed gwave
+  - removed pcb (replaced with KiCad version)
+  
+  - updated cty.dat (cty-3429) (VER20240816)
+  - updated GridTracker 1.24.0814
+  
+Version 26 - August 2024
+  - First release: big installation script
+
+  - added antscope2 1.3.7
+  - added ardop 1.0.4.1.2
+  - added Morse Runner 1.84
+  - updated Coil64 2.2.32
+  - updated cty.dat (cty-3426) (VER20240731)
+  - updated ESPHamClock 4.06
+  - updated flcluster 1.1.0
+  - updated GridTracker 1.24.0801
+  - updated gsmc 1.2.1
+  - updated MSHV 2.73
+  - updated nanovna-saver 0.6.3
+  - updated tqsl 2.7.3
+  - updated xwefax 2.4.4
+  - updated W1HJK documentation
+
+Version 25b (64-bit only 22.04.*) - May 2024
+  - updated Coil64 2.2.31
+  - updated cty.dat (cty-3415) (VER20240429)
+  - updated fldigi 4.2.05
+  - updated fllog 1.2.8
+  - updated flmsg 4.0.23
+  - updated flrig 2.0.05
+  - updated gsmc
+  - updated hamlib 4.5.5
+  - updated KLog 2.3.3
+  - updated MSHV 2.74
+  - updated noaa-apt 1.4.1
+  - updated wfview 1.65
+  - updated xnec2c 4.4.16
+  
+Version 25a (64-bit only 22.04.*) - May 2023
+  - added balena-etcher 1.18.1
+  - added GridTracker 1.23.0402
+  - added ESPHamClock
+  - added Logging_receiver
+  - added radiosonde_auto_rx
+  - added mvoice 0.8
+  - added wxWidgets 3.1.2
+  - removed gschem
+  - updated arduino 2.1.0
+  - updated acarsdec (rtl-sdr) 17-Mar-2023
+  - updated chirp(next) 20230427
+  - updated codec2 1.0.5
+  - updated Coil64 2.1.27
+  - updated cty.dat (cty-3316) (VER 20230502)
+  - updated fldigi 4.1.26
+  - updated flmsg 4.0.20
+  - updated flrig 1.4.8
+  - updated flwrap 1.3.6
+  - updated foxtelem 1.12z3
+  - updated freedv 1.8.7
+  - updated hamlib 4.5.4
+  - updated KLog 2.3
+  - updated mariadb 10.6
+  - updated MSHV 2.70
+  - updated NanoVNA-saver 0.5.5
+  - updated noaa-apt 1.4.0
+  - updated PotaPutter 0.4.1
+  - updated PyLogJam 0.9.0
+  - updated quisk 4.2.17
+  - updated sdrangel 7.11.0
+  - updated tqsl 2.6.5
+  - updated wfview 1.62
+  - updated xastir 2.1.8
+  - updated xcwcp 3.6
+  - updated xnec2c 4.4.12
+
+Version 25 (64-bit only 22.04.*) - June 2022
+  - Created this version with Cubic: https://launchpad.net/cubic
+  - added acarsdec (rtl-sdr)
+  - added Coil64
+  - added dump1090-mutability
+  - added mozillateam PPA
+  - added sdrangel
+  - removed dump1090
+  - removed easyspice
+  - removed gnetlist
+  - removed hamfax
+  - removed pskmail
+  - removed snapd
+  - removed xplanet
+  - updated aa-analyzer 0.09
+  - updated arduino 1.8.19
+  - updated ax25* from repository
+  - updated codec2 1.0.1
+  - updated cqrlog 2.5.2
+  - updated cty.dat (cty-3219) (VER 20220521)
+  - updated fldigi 4.1.22
+  - updated flnet 7.5.0
+  - updated flrig 1.4.5
+  - updated FoxTelem 1.11g2
+  - updated Fritzing 0.9.6
+  - updated gerbv 2.8.2
+  - updated GNU Radio 3.10.1
+  - updated Gpredict 2.3-72
+  - updated gqrx 2.15.8
+  - updated gspiceui 1.2.87
+  - updated js8call 2.2.1-devel
+  - updated jtdx 2.2.159
+  - updated kicad 6.0
+  - updated KLog 1.9
+  - updated linrad 05.01 (snapshot_2022-03-22)
+  - updated MSHV 2.65
+  - updated nanoVNA-saver 0.4.0
+  - updated qrq 0.3.5
+  - updated qsstv 9.5.8
+  - updated qtel 19.09.1
+  - updated quisk 4.1.93
+  - updated svxlink 19.09.2
+  - updated tqsl 2.5.9
+  - updated wfview (master 27-May-2022)
+  - updated xdx 2.91
+  - updated xnec2c 4.4.11
+  - updated xwefax 2.4.3
+  - updated xwxapt 3.4.3
+  - updated wsjtx 2.5.4
+  
+Version 24e (64-bit only 18.04.*) - October 2021
+  - added HOWTO_GridTracker
+  - added jtdx 2.2.0-rc155
+  - added PotaPutter 0.3.0
+  - added PyLogJam 0.8.1
+  - updated arduino 1.8.15
+  - updated cty.dat (cty-3123) (VER20210906)
+  - updated flamp 2.2.07
+  - updated flcluster 1.0.7
+  - updated fldigi 4.1.20
+  - updated fllog 1.2.7
+  - updated flmsg 4.0.19
+  - updated flnet 7.4.0
+  - updated flrig 1.4.2
+  - updated FoxTelem 1.11g
+  - updated hamlib 4.3.1
+  - updated MSHV 2.57
+  - added nanoVNA-saver 0.3.9pre
+  - added noaa-apt 1.3.1
+  - updated quisk 4.1.84
+  - updated qsstv 9.5.6
+  - updated tqsl 2.5.8
+  - updated wfview-master 03oct2021
+  - updated wsjtx 2.5.0
+  - updated xlog 2.0.24
+
+Version 24d (64-bit only 18.04.*) - March 2021
+  - added rf_exposure_calc in antenna menu
+  - added wfview 16-jan-2021 from git
+  - added wwl
+  - removed AlarmeJT
+  - updated cty.dat (cty-3102)
+  - updated direwolf 1.6
+  - updated flcluster 1.0.6
+  - updated fldigi 4.1.18
+  - updated flmsg 4.0.17
+  - updated flrig 1.3.53
+  - updated FoxTelem 1.09n5
+  - updated freedv 1.5.2 devel
+  - updated hamlib 4.1
+  - updated quisk 4.1.79
+  - updated tqsl 2.5.7
+  - updated wsjtx 2.3.0
+  - updated xastir 2.1.7
+  - updated xlog 2.0.22
+
+Version 24c (64-bit only, 18.04.5) - August 29, 2020
+  - added linrad 04.snapshot (2020-08-08)
+  - added nanoVNA-saver 0.3.6
+  - added tinySA-saver 0.2.2
+  - updated js8call 2.2.0
+
+Version 24b (64-bit only, 18.04.4) - July 12, 2020
+  - added bluetooth support
+  - added simplescreenrecorder
+
+Version 24a (64-bit only, 18.04.4) - June 11, 2020 (limited distribution)
+  - added atpdec 1.7
+  - added noaa-apt 1.2.0
+  - fixed /usr/local/bin/AlarmJT
+  - fixed pskmail_{client,server}
+  - fixed xwxapt
+  - updated javapskmail 1.8.6
+  - updated tqsl 2.5.4
+  - updated wsjtx 2.2.1
+
+Version 24 (64-bit only, 18.04.4) - May 16, 2020
+  - added gvfs-backends
+  - added gvfs-bin
+  - added yelp
+  - enabled password character echo
+  - removed ppa:kamalmostafa/fldigi (not updated since 01/2019)
+  - removed ppa:ubuntu-hams-updates/ppa (not updated since 01/2019)
+  - updated arduino 1.8.12
+  - updated flrig 1.3.50
+  - updated FoxTelem 1.08z5
+  - updated quisk 4.1.56
+  - updated tqsl 2.5.3  
+
+Version 23e (64-bit only, 18.04.4) - April 24, 2020
+  - added atlc
+  - added mirage
+  - added smplayer
+  - removed brightness
+  - removed mplayer, mplayer-gui
+  - removed xfe
+  - updated cty.dat to cty-3008 (VER 20200423)
+  - updated fldigi 4.1.12
+  - updated tqsl 2.5.3
+  - updated xlog 2.0.19
+  
+Version 23d (64-bit only, 18.04.4) - April 4, 2020
+  - removed icewm
+  - added some missing xfce4 packages
+  - added some ham radio wallpaper
+  - added gnome-system-tools
+  - added documentation menu entries
+  - updated RELEASE_NOTES and related documentation
+  
+Version 23c (64-bit only, 18.04.4) - March 1, 2020
+  - changed default windowing environment from icewm to xfce4
+  - added synaptic
+  - removed dillo
+
+Version 23a and 23b (64-bit only, 18.04.4) - unreleased
+  - local versions for experimentation
+
+Version 23 (64-bit only, 18.04.3) - January 12, 2020
+  - apt update; apt upgrade
+
+Version 23 ALPHA (64-bit only, 18.04.*) - December 31, 2019
+  - Upgraded to 18.04.3 LTS
+  - added AlarmeJT
+  - added gnome-screenshot
+  - added MSHV
+  - added W1HKJ pdf documentation (fldigi et al)
+  - recompiled ibp
+  - updated arduino 1.8.10
+  - updated chirp PPA
+  - updated chirp-daily 20191221~bionic~1
+  - updated cty.dat to cty-2918 (VER 20191228)
+  - updated flamp 2.2.05
+  - updated fldigi 4.1.08
+  - updated fllog 1.2.6
+  - updated flmsg 4.0.14
+  - updated flnet 7.3.3
+  - updated flrig 1.3.48
+  - updated freedv 1.4
+  - updated foxtelem 1.0.8w
+  - updated Fritzing 0.9.4 (CD-498)
+  - updated gerbv 2.7.0
+  - updated gnuradio PPA
+  - updated gnuradio 3.8.0.0
+  - updated gspiceui 1.2.36
+  - updated hamlib 3.3
+  - updated js8call 2.1.1
+  - updated kicad PPA
+  - updated kicad 5.1.5
+  - updated klog 0.9.8.1
+  - updated qgrid 3.2
+  - updated qsstv 9.4.4
+  - updated quisk 4.1.52
+  - updated tqsl 2.5.1
+  - updated wsjtx 2.1.2
+  - updated xastir 2.1.4
+  - updated xdx 2.9.0
+  - updated xlog 2.0.18beta
+
+Version 22b (64-bit only, 18.04.*) - March 2019
+  - updated js8call 1.0.0-rc2
+
+Version 22b BETA (64-bit only, 18.04.*) - March 2019
+  - updated KLog 0.9.7
+  - added polkit-1 actions for smartpm, multibootusb, ubiquity
+  - updated js8call 1.0.0-rc1
+  - created /root/bin/fix_account to workaround a ubiquity installer malfunction
+
+Version 22a (64-bit only, 18.04.*) - February 2019
+  - FAILURE - removed from public distribution
+  - fixed the initial text screen to indicate password = kb1oiq
+
+Version 22 (64-bit only, 18.04.*) - February 2019
+  - FAILURE - removed from public distribution
+  - Upgraded to Ubuntu 18.04
+  - added arduino 1.8.8
+  - added brightness-controller-simple 1.2.7
+  - added dillo
+  - added firefox
+  - added fritzing 0.9.3b
+  - added js8call 0.14
+  - added multibootusb 9.2.0
+  - removed live-usb-install
+  - removed midori
+  - updated ax25 (github Feb 2019)
+  - updated codec2 0.8.1
+  - updated direwolf 1.5
+  - updated flaa 1.0.2
+  - updated flamp 2.2.04
+  - updated flcluster 1.0.4
+  - updated fldigi 4.1.00
+  - updated fllog 1.2.5
+  - updated flmsg 4.0.8
+  - updated flrig 1.3.42
+  - updated flwrap 1.3.5
+  - updated foxtelem 1.06r
+  - updated freedv 1.3.1
+  - updated gpredict 2.2.1
+  - updated kicad 5.0.2
+  - updated libax25 1.1.1
+  - updated linpac (github Feb 2019)
+  - updated quisk 4.1.32
+  - updated xastir 2.1.1 (github 13jan2019)
+  - updated xlog 2.0.17, cty.dat VER 20190114
+  - updated xnec2c 4.1.1
+
+Version 21a (32-bit only) - November 2017
+  - fixed: unintentionally boots into text mode
+  - fixed: forgot some video drivers
+
+Version 21 - November 2017
+  - upgraded all to Ubuntu 16.04.x (using systemd, removed upstart)
+  - added firefox 56.0
+  - added flcluster 1.0.3
+  - added wordsworth 0.3
+  - updated live-usb-install 2.5.11
+  - removed wsjt (superceded by wsjt-x)
+  - updated Fox 1A Telemetry 1.05x
+  - updated codec2 0.7
+  - updated direwolf 1.4
+  - updated dump1090 1.10-3010.14
+  - updated fldigi 4.0.11
+  - updated flmsg 4.0.3
+  - updated flrig 1.3.35
+  - updated freedv 1.2.2
+  - updated gnuradio 3.7.10.1
+  - updated gqrx 2.8
+  - updated hamlib 3.1
+  - updated owx 20171129 (but has it really changed since 2015?)
+  - updated pskmail 1.8.6
+  - updated pskmail_server 2.4.beta (needed php5.6)
+  - updated quisk 4.1.10
+  - updated unixcw 3.5.1
+  - updated xastir 2.0.9 (with support for everything)
+  - updated xcwcp 3.5.1
+  - updated xlog 2.0.15
+  - updated xwxapt 2.9
+
+Version 20 - December 2016
+  - added homebrew script to get solar-terrestrial data from hamqsl.com
+  - updated ax25mail-utils 0.13
+  - added atpdec
+  - updated cty.dat to VER 20161124
+  - updated direwolf 1.3
+  - updated fllog 1.2.4
+  - updated flmsg 4.0.1
+  - updated flnet 7.3.2
+  - updated Fox 1A Telemetry 1.04f
+  - updated gpredict 1.4 (from ppa)
+  - updated gqrx 2.6
+  - updated hamlib 3.1~git (20161219)
+  - updated icewm 1.3.8
+  - updated owx 20161201
+  - updated qsstv 9.2.4
+  - updated soundmodem 0.20
+  - added sox
+  - updated tqsl 2.3
+  - updated wsjt-x 1.7 (from KI7MT PPA)
+  - voacap broken, replaced with online version (/usr/local/bin/start_voacap)
+  - updated xastir 20161127 2.0.9 (from github)
+
+Version 19 - April 2016
+  - added Fox 1A Telemetry 1.03
+  - added hamfax
+  - updated qsstv 9.0.7
+  - updated voacapl 0.6.7
+  - added qgrid 3.0.0
+  - updated gqrx 2.5.3
+  - updated cqrlog 1.9.1
+  - updated fllog 1.2.1
+  - updated flnet 7.2.5
+  - updated flwkey 1.2.3
+  - xlog and xdx: cty.dat version 2604 (2016-03-18)
+  - updated linpac 0.24
+  - updated owx 20160404
+  - updated qtel/svxlink 15.11
+  - updated tqsl 2.2.1
+  - updated unixcw 3.4.2
+  - added xwefax 1.9
+  - updated direwolf 1.3-beta
+  - updated key info in smart package manager
+  - updated KiCad 4.0.2 via ppa
+
+Version 18 - October 2015
+  - removed modemmanager
+  - added KiCad
+  - updated freedv 1.1
+  - updated direwolf 1-3-dev-F
+  - updated qsstv 8.2.12
+  - updated cwwav 0.5
+  - updated xastir 2.0.7
+  - updated qtel/svxlink 14.08.1
+  - added dream 2.1.1
+  - updated cqrlog 1.9.0
+  - updated flwkey 1.2.0
+  - updated fllog 1.2.0
+  - updated flnet 7.2.3
+  - updated linpac 0.23
+  - updated owx 20151005
+  - updated quisk 3.7.6
+  - updated xcwcp 3.4.2
+  - updated xdx 2.5
+  - updated xwxapt 2.4
+  - added usb-creator-gtk
+  - xlog and xdx: cty.dat version 2510 (2015-09-11)
+  - updated tqsl 2.1.2
+
+Version 17 - February 2015
+  - added tkdiff
+  - added minicom
+  - updated GNUradio 3.7.5
+  - added jpskmail 2.0.30
+  - added pskmail_server 2.3.5
+
+Version 16 - August 2014
+  - added ebook2cw(gui)
+  - major upgrade to Ubuntu 14.04 LTS
+  - added repository for live-usb-install
+  - updated all fl* programs in /usr/local by W1HKJ
+  - updated qsstv 8.2.7
+  - customized /etc/xfe/xferc (see HACKS) file associations
+  - added ppa for chirp (not kamal)
+  - updated open wouxun (owx-*) to version 20140808
+  - updated TrustedQSL 2.0.3
+  - I fixed VOACAP (I think)! (ssnFetch.py)
+  - direwolf 1.0
+  - added linpac 0.20 plux AX-25 packages 
+  - added lxrandr (screen resolution adjustment)
+  - added leafpad (xfwrite is broken?)
+  - updated gqrx 2.3.1
+
+Version 15.1 - April 2014
+  - New program: tt3_gpl configure a Byonics TinyTrak3
+  - Customization of xdm login, boot screen, and installation slideshow
+  - Add missing country file for cqrlog and update init_cqrlog script
+
+Version 15 - March 2014
+  - Major upgrade to Ubuntu 13.10
+  - qsstv 8.1.3
+  - replaced epdfview with evince
+  - updated all fl* programs in /usr/local by W1HKJ
+  - flmsg now in Kamal's repository
+  - added midori ppa
+  - added dump1090 for ADSB reception
+  - unfortunately, still need to use 32-bit hard drive installation hack
+ 
+Version 14 - October 2013
+  - added Alexandru Csete PPA for gqrx and gnuradio
+  - added gnuradio 3.7
+  - gqrx 2.2
+  - xlog 2.0.10 (from Kamal's PPA)
+  - added quisk
+  - added linamc
+  - added mupdf
+  - added direwolf 0.8
+  - live-usb-install 2.4.0
+  - added FreeDV 0.96.5 Beta
+  - added wsjt-x v1.1 r3496 (from jnogatch PPA)
+  - added mfc_gpl v0.01 alpha
+  - Fl_Moxgen 1.00
+  - flmsg 1.1.33 (in /usr/local/bin since repo is dated)
+  - flamp 2.1.01
+  - flrig 1.13.4
+  - added /usr/local/bin/version, removed it from /etc/motd.tail
+
+Version 13 - 20-mar-2013
+  - Major upgrade to Ubuntu 12.04.2 LTS
+  - added ubuntu-hams PPA repository
+    - now getting fldigi, flmsg, flwrap, trustedqsl from PPA
+    - removed from /usr/local/bin
+  - updated to most recent revs fldigi and family
+  - qsstv 7.1.7-3
+  - remove arora, install midori (lightweight browser)
+  - added splat
+  - added gqrx
+  - added GNU EDA
+  - added glfer
+  - xlog 2.0.6
+  - remove wspr (broken)
+  - remnants of jpskmail removed
+  - wicd-gtk iconified on startup
+  - fixed ubiquity cosmetic anomalies
+
+Version 12 - 20-oct-2012
+  - chirp 0.2.3
+  - cqrlog 1.5
+  - soundmodem
+  - voacap 0.5.8
+    - basemap 1.0.3
+    - matplotlib 1.0.1
+    - pythonprop 0.10
+  - fldigi 3.21.56
+  - fllog 1.1.5
+  - flmsg 1.1.27
+  - flrig 1.3.08
+  - flwkey 1.1.3
+  - flwrap 1.3.4
+  - live-usb-install 2.3.8
+  - (auto)mount removable devices: usbmount / pmount
+  - removed contents of /usr/local/tarballs to fit more software
+  - user needs to install default-jre for jpskmail (it didn't fit on the CD)
+
+Version 11 - 05-jun-2012
+  - Major upgrade to Ubuntu 11.10
+  - Using pulseaudio and ALSA (padsp installed)
+  - aa-analyzer 0.06
+  - chirp 0.2.2
+  - cqrlog 1.4.1
+  - cwwav 0.2.2
+  - fldigi 3.21.41
+  - fllog 1.1.2
+  - flmsg 1.1.16
+  - flrig 1.3.03
+  - flwkey 1.1.2
+  - flwrap 1.3.2
+  - net 6.0.04
+  - owx 20120527
+  - pskmail 2.0.5
+  - added sylpheed (for use with flarq)
+
+  - mysql root password is "kb1oiq"
+  - moved /usr/local/tarballs/00_SOURCES to /usr/local/share/doc/KB1OIQ_Ham_CD
+
+Version 10 - 12-nov-2011
+  - Major upgrade to Ubuntu 11.04
+  - Added graphical login via xdm (username: ubuntu, press enter for password)
+  - chirp 0.1.12 - a program to program frequencies into your HT
+  - CQRLOG 1.2.2
+    - Updated cqrlog country file to cqrlog-cty110721
+  - fldigi 3.21.24
+  - fllog 1.0.0
+  - flmsg 1.1.10
+  - flrig 1.2.2
+  - flwkey 1.0.0
+  - flwrap 1.3.1
+  - live-usb-install 2.3.2
+  - net 6.0.02 - a net control logging program by W1HKJ
+  - OpenSSH_5.5p1
+  - OSS 4.2
+    - Hacked rc.local to (re)start OSS
+  - ubiquity 2.6.11
+  - Created /usr/local/tarballs/00_SOURCES to document the locations from
+    which tarballs and deb files were downloaded.
+  - removed xpdf, added epdfview, updated Utilities menu
+  - modified /etc/motd.tail
+  - kernel 2.6.38-12
+  - Documented local customizations in /usr/local/share/doc/KB1OIQ_Ham_CD/HACKS
+
+Version 9 - 15-july-2011
+  - CQRLOG 1.1.0
+  - created /usr/local/bin/init_cqrlog script (see RELEASE_NOTES)
+  - Added WiCD for network management
+  - Installed Xfe 1.32.4 from deb file
+  - Installed pcmciautils
+  - Installed cwwav 0.2.1 from source tarball
+  - Installed lame
+  - Fldigi 3.21.12
+  - Fllog 1.0.0
+  - Installed xplanet and predict, created earthtrack_cleanup
+  - Installed live-usb-install-2.2.9, customized slightly
+  - Installed Smart package manager 1.4 from deb file
+  
+Version 8 - 12-may-2011
+  - First version released to SourceForge
+  - Fldigi 3.21.9
+  - wireless tools
+  - iptraf
+  - flrig-1.1.3
+  - CQRLOG 1.0.0 beta 1
+
+Version 7 - 04-april-2011
+  - Flmsg 1.1.6, Flrig 1.1.2
+  - Gpredict 1.3 from the Gpredict Team's personal package archive with 
+    updated TLEs
+  - Added grig, ntpdate, xdx, xwxapt
+  - Added icons to customized menus
+
+Version 6 - 27-march-2011
+  - created RELEASE_NOTES and CHANGES in /usr/local/share/doc/KB1OIQ_Ham_CD/
+  - Updated /etc/motd.tail
+  - Installed CQRLOG 1.0.0 alpha 2 from a Debian package file
+    - country files are in /usr/local/src/cqrlog-cty110308
+  - Kernel 2.6.35-28
+  - Fldigi 3.21.7, Flmsg 1.1.5, Flrig 1.1.1
+
+Version 5 - initial, very limited release, based on Ubuntu 10.10.

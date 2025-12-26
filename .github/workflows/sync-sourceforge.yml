@@ -168,20 +168,37 @@ jobs:
             cp /tmp/backup/README.md .
           fi
 
-      - name: Update version in README.md
+      - name: Download additional files from SourceForge
         if: steps.compare.outputs.needs_update == 'true'
         run: |
           VERSION="${{ steps.sourceforge_version.outputs.version }}"
+          BASE_URL="https://sourceforge.net/projects/kb1oiq-andysham/files/${VERSION}"
 
-          if [ -f README.md ]; then
-            # Update "Latest Version:" line
-            # Pattern: "Version 26e: November 2025" -> extract month/year from install_ahrl if needed
+          echo "Downloading additional documentation files..."
 
-            # For now, just update the version number, keep existing date
-            sed -i "s/Version [0-9]*[a-z]*:/Version ${VERSION#v}:/g" README.md
+          # List of files to download (without version suffix)
+          FILES=(
+            "SOFTWARE"
+            "README_FIRST"
+            "README.txt"
+            "README"
+            "GETTING_STARTED"
+            "CHANGES"
+          )
 
-            echo "Updated README.md with version $VERSION"
-          fi
+          # Download each file
+          for file in "${FILES[@]}"; do
+            echo "Downloading $file..."
+            curl -L -o "$file" "${BASE_URL}/${file}/download" || echo "Warning: Failed to download $file"
+          done
+
+          # Download md5sum file with version in filename
+          MD5_FILE="md5sum_${VERSION}.txt"
+          echo "Downloading $MD5_FILE..."
+          curl -L -o "$MD5_FILE" "${BASE_URL}/${MD5_FILE}/download" || echo "Warning: Failed to download $MD5_FILE"
+
+          echo "Additional files downloaded successfully"
+          ls -lh SOFTWARE README_FIRST README.txt README GETTING_STARTED CHANGES "$MD5_FILE" 2>/dev/null || true
 
       - name: Generate change summary
         if: steps.compare.outputs.needs_update == 'true'
