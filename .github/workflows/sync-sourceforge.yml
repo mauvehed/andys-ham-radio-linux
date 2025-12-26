@@ -1,0 +1,294 @@
+name: Sync from SourceForge
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+          lfs: true
+
+      - name: Get current version from latest tag
+        id: current_version
+        run: |
+          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+          echo "Current tag: $CURRENT_TAG"
+          echo "tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fetch SourceForge RSS feed
+        id: sourceforge_version
+        run: |
+          # Fetch RSS feed
+          RSS_URL="https://sourceforge.net/projects/kb1oiq-andysham/rss"
+          echo "Fetching RSS from: $RSS_URL"
+
+          # Download RSS feed
+          curl -sL "$RSS_URL" > rss.xml
+
+          # Extract the latest version from RSS
+          # Looking for pattern like "andy_v26e.tar.gz" in the feed
+          LATEST_VERSION=$(grep -oP 'andy_v[0-9]+[a-z]\.tar\.gz' rss.xml | head -1 | sed 's/andy_\(v[0-9]*[a-z]\)\.tar\.gz/\1/')
+
+          if [ -z "$LATEST_VERSION" ]; then
+            echo "ERROR: Could not extract version from RSS feed"
+            cat rss.xml
+            exit 1
+          fi
+
+          echo "Latest SourceForge version: $LATEST_VERSION"
+          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+
+          rm rss.xml
+
+      - name: Compare versions
+        id: compare
+        run: |
+          CURRENT="${{ steps.current_version.outputs.tag }}"
+          LATEST="${{ steps.sourceforge_version.outputs.version }}"
+
+          echo "Current: $CURRENT"
+          echo "Latest: $LATEST"
+
+          if [ "$CURRENT" = "$LATEST" ]; then
+            echo "Already up to date!"
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version available: $LATEST"
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download tarball from SourceForge
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.sourceforge_version.outputs.version }}"
+          DOWNLOAD_URL="https://sourceforge.net/projects/kb1oiq-andysham/files/${VERSION}/andy_${VERSION}.tar.gz/download"
+
+          echo "Downloading from: $DOWNLOAD_URL"
+
+          # Download with retry
+          for i in {1..3}; do
+            if curl -L -o andy.tar.gz "$DOWNLOAD_URL"; then
+              echo "Download successful"
+              break
+            else
+              echo "Download attempt $i failed, retrying..."
+              sleep 5
+            fi
+          done
+
+          # Verify download
+          if [ ! -f andy.tar.gz ]; then
+            echo "ERROR: Download failed"
+            exit 1
+          fi
+
+          # Check file size
+          SIZE=$(stat -c%s andy.tar.gz 2>/dev/null || stat -f%z andy.tar.gz)
+          echo "Downloaded file size: $SIZE bytes"
+
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "ERROR: Downloaded file is too small, likely invalid"
+            exit 1
+          fi
+
+      - name: Extract tarball
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          echo "Extracting tarball..."
+          mkdir -p /tmp/extracted
+          tar -xzf andy.tar.gz -C /tmp/extracted
+
+          # Find the actual content directory (in case there's a wrapper directory)
+          CONTENT_DIR=$(find /tmp/extracted -mindepth 1 -maxdepth 1 -type d | head -1)
+
+          if [ -z "$CONTENT_DIR" ]; then
+            # No wrapper directory, content is directly in extracted/
+            CONTENT_DIR="/tmp/extracted"
+          fi
+
+          echo "Content directory: $CONTENT_DIR"
+          echo "CONTENT_DIR=$CONTENT_DIR" >> $GITHUB_ENV
+
+          # List extracted contents
+          echo "Extracted contents:"
+          ls -la "$CONTENT_DIR"
+
+      - name: Backup protected files
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          mkdir -p /tmp/backup
+
+          # Backup .github directory if it exists
+          if [ -d .github ]; then
+            echo "Backing up .github/"
+            cp -r .github /tmp/backup/
+          fi
+
+          # Backup README.md if it exists
+          if [ -f README.md ]; then
+            echo "Backing up README.md"
+            cp README.md /tmp/backup/
+          fi
+
+      - name: Update repository contents
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          echo "Clearing repository (preserving .git)..."
+
+          # Remove all files except .git
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          echo "Copying new contents from tarball..."
+          cp -r "$CONTENT_DIR"/* .
+
+          # Copy hidden files if any
+          shopt -s dotglob
+          cp -r "$CONTENT_DIR"/.??* . 2>/dev/null || true
+
+          echo "Restoring protected files..."
+
+          # Restore .github
+          if [ -d /tmp/backup/.github ]; then
+            rm -rf .github
+            cp -r /tmp/backup/.github .
+          fi
+
+          # Restore README.md
+          if [ -f /tmp/backup/README.md ]; then
+            cp /tmp/backup/README.md .
+          fi
+
+      - name: Update version in README.md
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.sourceforge_version.outputs.version }}"
+
+          if [ -f README.md ]; then
+            # Update "Latest Version:" line
+            # Pattern: "Version 26e: November 2025" -> extract month/year from install_ahrl if needed
+
+            # For now, just update the version number, keep existing date
+            sed -i "s/Version [0-9]*[a-z]*:/Version ${VERSION#v}:/g" README.md
+
+            echo "Updated README.md with version $VERSION"
+          fi
+
+      - name: Generate change summary
+        if: steps.compare.outputs.needs_update == 'true'
+        id: changes
+        run: |
+          # Get detailed git status
+          git add -A
+
+          ADDED=$(git diff --cached --name-only --diff-filter=A | wc -l)
+          MODIFIED=$(git diff --cached --name-only --diff-filter=M | wc -l)
+          DELETED=$(git diff --cached --name-only --diff-filter=D | wc -l)
+
+          echo "added=$ADDED" >> $GITHUB_OUTPUT
+          echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
+          echo "deleted=$DELETED" >> $GITHUB_OUTPUT
+
+          # Save file lists
+          echo "Added files:" > /tmp/changes.txt
+          git diff --cached --name-only --diff-filter=A >> /tmp/changes.txt
+          echo "" >> /tmp/changes.txt
+          echo "Modified files:" >> /tmp/changes.txt
+          git diff --cached --name-only --diff-filter=M >> /tmp/changes.txt
+          echo "" >> /tmp/changes.txt
+          echo "Deleted files:" >> /tmp/changes.txt
+          git diff --cached --name-only --diff-filter=D >> /tmp/changes.txt
+
+          cat /tmp/changes.txt
+
+      - name: Commit changes
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.sourceforge_version.outputs.version }}"
+          ADDED="${{ steps.changes.outputs.added }}"
+          MODIFIED="${{ steps.changes.outputs.modified }}"
+          DELETED="${{ steps.changes.outputs.deleted }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create detailed commit message
+          cat > /tmp/commit_msg.txt << EOF
+          Sync with SourceForge $VERSION
+
+          Files added: $ADDED
+          Files modified: $MODIFIED
+          Files deleted: $DELETED
+
+          Source: https://sourceforge.net/projects/kb1oiq-andysham/files/$VERSION/
+          EOF
+
+          # Append detailed file list if not too large
+          TOTAL_CHANGES=$((ADDED + MODIFIED + DELETED))
+          if [ $TOTAL_CHANGES -lt 100 ]; then
+            echo "" >> /tmp/commit_msg.txt
+            cat /tmp/changes.txt >> /tmp/commit_msg.txt
+          fi
+
+          git commit -F /tmp/commit_msg.txt
+
+      - name: Create and push tag
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.sourceforge_version.outputs.version }}"
+
+          git tag -a "$VERSION" -m "Release $VERSION from SourceForge"
+          git push origin main
+          git push origin "$VERSION"
+
+      - name: Create GitHub Release
+        if: steps.compare.outputs.needs_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.sourceforge_version.outputs.version }}"
+          ADDED="${{ steps.changes.outputs.added }}"
+          MODIFIED="${{ steps.changes.outputs.modified }}"
+          DELETED="${{ steps.changes.outputs.deleted }}"
+
+          # Create release notes
+          cat > /tmp/release_notes.md << EOF
+          # Andy's Ham Radio Linux $VERSION
+
+          Automatically synced from [SourceForge](https://sourceforge.net/projects/kb1oiq-andysham/files/$VERSION/).
+
+          ## Changes
+          - **$ADDED** files added
+          - **$MODIFIED** files modified
+          - **$DELETED** files deleted
+
+          ## Download
+          - [Direct download from SourceForge](https://sourceforge.net/projects/kb1oiq-andysham/files/$VERSION/andy_${VERSION}.tar.gz/download)
+
+          ---
+
+          This is a mirror of the official SourceForge repository.
+          EOF
+
+          gh release create "$VERSION" \
+            --title "Release $VERSION" \
+            --notes-file /tmp/release_notes.md \
+            andy.tar.gz
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.compare.outputs.needs_update }}" = "true" ]; then
+            echo "✅ Successfully synced to version ${{ steps.sourceforge_version.outputs.version }}"
+          else
+            echo "ℹ️ Already up to date with version ${{ steps.current_version.outputs.tag }}"
+          fi
