@@ -1,0 +1,112 @@
+UVA1 memory map (created with help from Dmitriy Golub), possibly 
+incomplete, but that's what is implemented in owx now.
+
+Memory size: 4kB (0x1000 bytes)
+
+offset	size	description		allowed values
+0x010	16	Channel 1		See below
+0x020	16	Channel 2		See below
+0x030	16	Channel 3		See below
+0x040	16	Channel 4		See below
+0x050	16	Channel 5		See below
+0x060	16	Channel 6		See below
+0x070	16	Channel 7		See below
+0x080	16	Channel 8		See below
+0x090	16	Channel 9		See below
+0x0A0	16	Channel 10		See below
+0x0B0	16	Channel 11		See below
+0x0C0	16	Channel 12		See below
+0x0D0	16	Channel 13		See below
+0x0E0	16	Channel 14		See below
+0x0F0	16	Channel 15		See below
+0x100	16	Channel 16		See below
+0x370	2	VHF RX low		See below
+0x372	2	VHF RX high		See below
+0x374	2	UHF RX low		See below
+0x376	2	UHF RX high		See below
+0x378	2	VHF TX low		See below
+0x37A	2	VHF TX high		See below
+0x37C	2	UHF TX low		See below
+0x37E	2	UHF TX high		See below
+0x622	1	Squelch level		0x00 - disabled, 0x01-0x09 level
+0x623	1	Battery save flag	0x00 - disabled, 0x01 - enabled
+0x625	1	Roger beep		0x00 - off, 0x01 - at beginning, 0x02 - at end, 0x03 - both
+0x626	1	TOT (Time-Out Timer)	0x00-0x27, time [s] = (value + 1) * 15s, so range is 15s-600s
+0x627	1	VOX activ. and level	0x00 - disabled, 0x01-0x0A - level (1-10)
+0x62C	1	Voice guide		0x00 - off, 0x01 - chinese, 0x02 - english
+0x62D	1	Beep flag		0x00 - beep off, 0x01 - beep on
+0x636	1	TOA (Pre-Alert)		0x00 - off, 0x01-0x0A - time (1s-10s)
+0x63B	1	Programmable button fn	0x01 - scan, 0x03 - SOS, 0x04 - FM radio
+0x65E	1	Priority channel number	0x00 - off, 0x01-0x10 - channels 1-16
+
+Channels and ranges are encoded as in other Wouxuns, that is:
+
+Channels:
+
+offset	size	description
+0x00	4	RX Frequency
+0x04	4	TX Frequency
+0x08	2	RX CTCSS
+0x0A	2	TX CTCSS
+0x0C	1	BCL (0x00 or 0x07 - no, 0x08 or 0xFF - yes)
+0x0D	1	Flags (bit mask)
+
+Frequency decoding:
+
+- convert all bytes to their hex values
+- concatenate them in reverse order (byte 3, byte 2, byte 1, byte 0)
+- first 3 characters are MHz
+- remaining 5 characters are fractions
+
+So, for example, frequency 446.00625 will be stored as 0x25 0x06 0x60 0x44.
+
+CTCSS decoding:
+
+- get these bytes as a little-endian variable (so 0xCE 0x04 becomes 0x04CE, or 1230 decimal)
+- divide this decimal value by 10 and you have CTCSS in Hz (in this case 123.0 Hz)
+
+0xFF 0xFF means "no CTCSS".
+
+Flags decoding:
+
+- bit 7 (0x80): ?
+- bit 6 (0x40): Scan enabled (1 - yes, 0 - no)
+- bit 5 (0x20): TX power (1 - high, 0 - low)
+- bit 4 (0x10): Deviation (1 - wide, 0 - narrow)
+- bit 3 (0x08): ?
+- bit 2 (0x04): ?
+- bit 1 (0x02): ?
+- bit 0 (0x01): ?
+
+Ranges decoding:
+
+There is a conversion table:
+
+- 0 becomes 2
+- 1 becomes 7
+- 2 becomes 5
+- 3 becomes 8
+- 7 becomes 0
+- 9 becomes 3
+- A becomes 1
+- B becomes 4
+- E becomes 6
+- F becomes 9
+
+You have to create four values:
+
+- v0 - byte 0 upper nibble
+- v1 - byte 0 lower nibble
+- v2 - byte 1 upper nibble
+- v3 - byte 1 lower nibble
+
+Then for each value you:
+
+- look it up in conversion table table
+- if it is not found, then you have a problem - it's not possible
+- you use this converted value as your next digit
+
+For example if your range entry is 0x7A 0x9E, you have to convert 
+it to four nibbles: 7 A 9 E, convert them using the table so they 
+become 0 1 3 6 and put it all together, so you have 136 MHz. It's 
+that simple.

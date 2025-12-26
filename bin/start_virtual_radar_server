@@ -1,0 +1,6 @@
+#!/bin/bash
+
+dump1090-mutability --net --quiet &
+(sleep 5s; firefox http://localhost:8080/VirtualRadar) &
+mono /usr/local/src/VirtualRadar/VirtualRadar.exe
+killall -9 dump1090-mutability

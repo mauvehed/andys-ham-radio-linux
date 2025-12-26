@@ -1,0 +1,45 @@
+HOWTO JS8Call
+=============
+
+JS8Call is under development as of this writing.  The software will
+expire, forcing the user to upgrade to a new version.  The version
+installed here has perhaps expired, and you're wondering what to do.
+
+First, download the most recent copy from here:
+    https://groups.io/g/js8call/wiki/Download-Links
+
+You'll want to look in the Linux section of that website, and 
+download the *.deb file for Ubuntu 18.04 for a 64-bit computer.
+
+The filename will be SIMILAR to this:
+    js8call_1.0.0_18.04_amd64.deb
+
+Remember the directory into which this file was downloaded.
+
+From a terminal window, do the following as root, and BE CAREFUL.  Note
+that you'll need to substitute the name of the directory, and the proper
+file name.  If you type this verbatim, it won't work.  If you're filled
+with uncertainty, stop now.
+
+    sudo dpkg --remove js8call
+    sudo mv <dir>/js8call_<whatever>.deb /usr/local/tarballs
+    sudo dpkg -i /usr/local/tarballs/js8call_<whatever>.deb
+    which js8call
+
+The output from the "which js8call" command should be:
+    /usr/bin/js8call
+
+If so, and if there were no errors from the "dpkg -i" command, you
+might be on your way to success!
+
+If you received a lot of errors about unresolved dependencies, you
+should probably elect to stop.  Resolving dependencies can be painful.  
+It is also possible that you've downloaded the wrong *.deb file for 
+your system.
+
+If all is well, try it:  js8call
+
+If the JS8Call window appears on your screen, you have succeeded!
+Congratulations!
+
+AMS 06-Mar-2019

@@ -1,0 +1,10 @@
+Format-Specification: http://wiki.debian.org/Proposals/CopyrightFormat
+Upstream-Name: jtdx
+Upstream-Maintainer: Igor Chernikov <c_igor@inbox.ru>, Arvo Järve <arvo.jarve@eesti.ee>
+Upstream-Source: http://sourceforge.net/projects/jtdx/
+
+Files: *
+Copyright: Copyright (C) 2016-2020 by Igor Chernikov, UA3DJY and Arvo Järve, ES1JA..
+License: GPL v3
+ The full text of the GPL is distributed in
+ /usr/share/common-licenses/GPL-3 on Debian systems.

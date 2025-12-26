@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ "$1" == "" ]; then
+    echo "What is your username?"
+    read newuser
+else
+    newuser=$1
+fi
+
+adduser --quiet --home /home/$newuser --shell /bin/bash $newuser
+
+adduser $newuser adm
+adduser $newuser sudo
+adduser $newuser lpadmin
+adduser $newuser dip
+adduser $newuser plugdev
+adduser $newuser netdev
+adduser $newuser cdrom
+adduser $newuser dialout
+adduser $newuser xastir-ax25
+adduser $newuser svxlink

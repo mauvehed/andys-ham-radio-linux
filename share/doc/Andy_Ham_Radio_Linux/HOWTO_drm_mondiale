@@ -1,0 +1,50 @@
+HOWTO listen to a DRM (digital radio mondiale) station
+======================================================
+
+1) Start gqrx and tune to an appropriate station.  The station is USB and 
+   requires a filter 10kHz wide.  Line up the cursor with the left edge of
+   the rectangular waterfall image of the signal.
+
+2) Start the dream program.
+   (Menu->Amateur Radio->SDR->Dream)
+
+3) Start the pavucontrol program.
+   (Menu->Utilities->Sound->pavucontrol)
+
+4) In the dream program, View->Evaluation Dialog, which will bring up
+   the System Evaluation window.  In the chart selector, look at the
+   Input PSD.  Watch the DC Frequency of DRM signal and be sure that it is
+   close to 5000 Hz (or maybe just a little bit below).  The SNR needs to be
+   at least 16.0 dB in my experience.  If the MSC CRC indicator is red, the
+   signal may not be tuned correctly, or perhaps insufficiently strong.
+   In gqrx, sometimes this can be remedied by boosting the signal by 
+   increasing the LNA gain in the input controls tab.
+
+5) In the pavucontrol program:
+   a) in the input devices tab, set the internal microphone volume to zero
+      for both left and right channels
+   b) in the playback tab, notice that gqrx and the dream receiver are both
+      shown.  The gqrx audio output is set for "simultaneous output to built-in
+      audio analog stereo".  The dream receiver audio output is set for 
+      "build-in audio analog stereo.
+   c) in the recording tab, the dream receiver should be getting its input
+      from "monitor source of simultaneous output to built-in analog
+      audio stereo"
+
+6) In the dream program, go to the Settings menu:
+   a) Settings -> Sound Card -> Signal Input -> Device -> combined_monitor
+   b) Settings -> Sound Card -> Audio Output -> Device -> default
+
+7) Play with the volume controls in pavucontrl, and the audio gain in the gqrx
+   program.  With everything set correctly, one should hear the digital
+   radio mondiale broadcast.
+
+8) These were the settings on my computer.  Your sound card may have different
+   settings.
+
+9) Many thanks to Alex (OZ9AEC) Csete for pointing me in the right direction.
+   http://oz9aec.net/index.php/gnu-radio-blog/463-gqrx-and-pulseaudio
+   http://www.pe0sat.vgnet.nl/decoding/unix-tlm-decoding/
+   http://www.george-smart.co.uk/wiki/Meteor_Scatter_Reception_on_RTL-SDR
+
+AMS 14-feb-2016

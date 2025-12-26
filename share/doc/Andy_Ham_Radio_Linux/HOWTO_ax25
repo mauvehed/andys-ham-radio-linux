@@ -1,0 +1,22 @@
+
+HOWTO ax25
+==========
+
+There are several AX25 related programs installed on Andy's Ham Radio Linux.
+
+/usr/sbin/ax25_call
+/usr/sbin/ax25d
+/usr/sbin/ax25ipd
+/usr/sbin/ax25mond
+/usr/sbin/ax25rtctl
+/usr/sbin/ax25rtd
+
+References:
+
+https://en.wikipedia.org/wiki/AX.25
+https://packet-radio.net/ax-25/
+
+Andy
+KB1OIQ
+06-April-2023
+

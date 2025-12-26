@@ -1,0 +1,618 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="generator" content="Bluefish 2.2.10" >
+<title>xwxapt User Manual</title>
+<meta name="author" content="Neoklis" >
+<meta name="date" content="2018-11-26T08:20:28+0200" >
+<meta name="copyright" content="GPL v2.0 or higher">
+<meta name="keywords" content=
+"Weather satellite APT GUI image decoder">
+<meta name="description" content=
+"Weather satellite APT GUI image decoder">
+<meta name="ROBOTS" content="INDEX, FOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+</head>
+<body>
+<h3>xwxapt User Manual</h3>
+<ol>
+<li><a href="#Introduction">Introduction</a>
+<ul>
+<li><a href="#Use">Usage</a></li>
+</ul>
+</li>
+<li><a href="#Features">Features</a>
+<ul>
+<li><a href="#Soundcard">Sound card set-up</a></li>
+<li><a href="#RTL-SDR">RTL-SDR dongle set-up</a></li>
+<li><a href="#Synchronous">Synchronous decoding</a></li>
+<li><a href="#Normalize">Normalization of images</a></li>
+<li><a href="#Colorize">Pseudo-colorization of images</a></li>
+<li><a href="#Rotate">Rotation of images</a></li>
+<li><a href="#Modes">Modes of operation</a></li>
+</ul>
+</li>
+<li><a href="#Compilation">Compilation</a></li>
+<li><a href="#Usage">Command line options</a></li>
+<li><a href="#Operation">Operation</a></li>
+<li><a href="#Bugs">Bugs and annoyances</a></li>
+<li><a href="#Version">Version history</a></li>
+<li><a href="#Copying">Copying</a></li>
+</ol>
+<p><a name="Introduction" id="Introduction"><b>1.
+Introduction</b></a><br>
+xwxapt is the interactive X/GTK+-3 GUI version of the command-line
+APT weather satellite decoding tool, wxapt. Currently xwxapt can
+decode images in the American NOAA and Russian Meteor satellite APT
+formats. Images are decoded and displayed either in real time,
+direct from an analogue receiver's o/p through the computer's sound
+card, or from a file of sound samples recorded by xwxapt. Starting
+from version 2.5, xwxapt supports reception through the now very
+popular RTL-SDR receiver dongles, available cheaply from many
+sources.</p>
+<p><a name="Use" id="Use"><b>Usage:</b></a> xwxapt [-hv]</p>
+<p>-b: Specify Low Pass Filter Cutoff in Hz.</p>
+<p>-f: Specify Tuner Center Frequency in Hz.</p>
+<p>-h: Print this usage information and exit.</p>
+<p>-v: Print version number and exit.</p>
+<p><a name="Features" id="Features"><b>2. Features</b></a><br>
+The original wxapt application was designed from the beginning to
+be simple and efficient, decoding images using only integer
+arithmetic and simple processing methods. xwxapt inherits the same
+image decoding engine and basic features of wxapt, but after
+version 0.8 the 2.4 kHz APT sub-carrier is sampled at 48 kHz
+instead of 9.6 kHz, since software re-sampling in ALSA caused
+severe artifacts in the decoded images. This also made it necessary
+to change the formula used to calculate instantaneous carrier
+amplitude, since the phase angle between consecutive samples is no
+longer 90 deg. To restore this phase relationship, a ring buffer is
+used to store DSP samples over 1/4 period of the 2.4 kHz
+Sub-Carrier. For a 48kHz sampling rate, this would require a ring
+buffer of 5 stages. The sub-carrier amplitude is calculated by the
+hypotenuse of the current DSP sample and one store at the end of
+the ring buffer.</p>
+<p>xwxapt can decode images in real time as they are received from
+the satellite and display them incrementally as they form,
+slow-scan TV fashion. The images displayed in the xwxapt window are
+half the size of the ones that are written to the disk, so they are
+displayed at a rate of one line per second.</p>
+<p><a name="Soundcard" id="Soundcard"><b>Sound-card
+set-up</b></a><br>
+If reception with a linear receiver is specified in xwxaptrc config
+file, xwxapt automatically sets up the required sound card
+parameters (sample format, sampling speed, mixer levels etc) for
+correct operation. The Capture level set up is no longer automatic
+in this version, because limitations in the resolution of mixer
+level settings and incompatibility between the period size of the
+PCM and xwxapt's 'samples' buffer make the settings inaccurate.
+Audio level setting is now done manually as a one-off procedure
+after installation of 'xwxapt', using the audio level set-up
+function.</p>
+<p><a name="RTL-SDR" id="RTL-SDR"><b>RTL-SDR Dongle
+set-up</b></a><br>
+If reception with an RTL-SDR Dongle is specified in xwxaptrc config
+file, xwxapt automatically sets up the required RTL-SDR parameters
+(Center Frequency, Sampling Rate, Butterworth LPF cut-off etc) for
+correct operation. The Signal Level setup is not required when
+using the RTL-SDR dongle because this is set up permanently in the
+source code and should be right with most compatible dongles.
+Signal Level is still displayed by the relevant Progress Bar.</p>
+<p><a name="Synchronous" id="Synchronous"><b>Synchronous
+decoding</b></a><br>
+xwxapt decodes images or records the APT signal in a synchronized
+manner. Whether decoding images in real time or recording the APT
+signal, xwxapt detects the sync train included in the APT format
+and arranges for the samples buffer, used in reading from the dsp
+device, to contain the sync train near its beginning. The result is
+that image lines are aligned quite accurately and the recorded
+samples are stored in a file in a line-by-line fashion. This makes
+decoding from files easier and faster.</p>
+<p>Detection of the sync pulse train is done by simulating a
+synchronous detector, matching the waveform of the sync pulse
+train. In NOAA type APT signals, the sync train of Channel A is
+detected and used for alignment of both images. In Meteor type APT
+signals there is only one image and sync train. The NOAA sync train
+is 7 cycles at 1040 Hz with a 1/1 mark/space ratio superimposed on
+the 2.4 kHz sub-carrier. The Meteor sync train is 5 cycles at 1200
+Hz with a 2/1 mark/space ratio. Identification of satellite type
+and APT format is now not done automatically, since this process is
+unreliable in noisy signal conditions and caused xwxapt to abort if
+the sync train signature was not identified.</p>
+<p><a name="Normalize" id="Normalize"><b>Normalization of
+images</b></a><br>
+xwxapt performs simple (linear) histogram normalization of the APT
+images to enhance low contrast, especially in the channel B images
+of NOAA satellites. If normalization is not desired, it can be
+suppressed by deactivating the "Normalize" toggle button.</p>
+<p><a name="Colorize" id="Colorize"><b>Pseudo-colorization of
+images</b></a><br>
+xwxapt can colorize the decoded gray scale images by using a simple
+gray-level-to-color scheme, based on a color map in the
+~/xwxapt/xwxaptrc file. This color map is specified by a table of
+gray-scale range values with corresponding Red, Green and Blue
+ranges. The table can have a maximum of six rows of gray-to-RGB
+ranges which is enough for the simple scheme used by xwxapt. More
+details on the format of this color table scheme are in the
+~/xwxapt/xwxaptrc file itself. Only the day-time A channel image of
+the NOAA satellites is colorized, since the gray scale values of
+other images don't represent ground features nearly enough.
+Actually the NOAA colorized image is a hybrid of the day-time A and
+B channel images, with ground features rendered from the A channel
+and clouds from the B channel. If colorization is not desired, it
+can be suppressed by deactivating the "Colorize" toggle button.</p>
+<p><a name="Rotate" id="Rotate"><b>Rotation of images</b></a><br>
+xwxapt can perform 180 degree rotation of the APT images if the
+'Invert images' item in the pop-up menu is checked. This is useful
+for righting the inverted images produced by the South-to-North
+passes of the satellites.</p>
+<p><a name="Modes" id="Modes"><b>Modes of operation</b></a><br>
+xwxapt has two modes of operation: Real-time decoding of APT images
+directly from the audio output of a receiver and via the sound
+card, or from streaming ADC data from an RTL-SDR Dongle, or
+decoding images from a file of pre-recorded samples of APT signals.
+In either case, xwxapt produces images in raw binary (P5 type) pgm
+files, one for each of the two (ch A and ch B) images in NOAA APT
+signals and one for the single Meteor APT image. In both cases the
+various additions to the images (e.g. the sync train, gray scale
+wedges, margins etc) are removed form the images. Pseudo-colorized
+versions of the gray scale images are produced in raw binary (P6
+type) ppm files. APT signal recording is done in straight binary
+format. When decoding in real time, half-size images are displayed
+progressively in the xwxapt main window as they form.</p>
+<p><a name="Compilation" id="Compilation"><b>3.
+Compilation</b></a><br>
+Please note that I use <a href="http://www.voidlinux.eu">Void Linux
+AMD64</a> which is a "bleeding edge" type distribution, so there
+may be compilation and/or run time difficulties if you are using a
+relatively old distro. This is mostly true of the basic
+dependencies like GTK+-3 and Glade-2, and there can also be sound
+card incompatibility problems at run time.</p>
+<p>To compile the package, it may be preferable to first run the
+included "autogen.sh" script in the package's top directory, to
+produce a fresh build environment. Then the "configure" script can
+be run with optional parameters to override the default settings
+and compiler flags, e.g: ./configure --prefix=/usr CFLAGS="-g -O2"
+will override the default /usr/local installation prefix and the
+"-Wall -O2" compiler flags.</p>
+<p>Running "make" in the package's top directory should produce the
+executable binary in src/. Running "make install" will install the
+binary into /usr/local/bin by default or under the specified
+prefix. It will also install the xwxapt working directory and
+default configuration file into the user's home directory. This
+will have to be edited by the user as required. There is also this
+hypertext documentation file which you can copy to a location of
+your choice.</p>
+<p><a name="Usage" id="Usage"><b>4. Command line
+options</b></a><br>
+xwxapt's own command line options are:</p>
+<p>-b: Specify Low Pass Filter Cutoff in Hz.</p>
+<p>-f: Specify Tuner Center Frequency in Hz.</p>
+<p>-h: Print this usage information and exit.</p>
+<p>-v: Print version number and exit.</p>
+<p><a name="Operation" id="Operation"><b>5. Operation</b></a><br>
+<b>Setting up working directories:</b><br>
+Before xwxapt is used to receive images, it is important to
+understand how the resulting image files are named and saved. In
+normal usage, xwxapt will be allowed to generate default file names
+and store image and recorded APT files in its default directories.
+The image and recorded audio file names are created from a base
+string of the format ddMonyyyy-hhmm where dd is the day number, Mon
+is the month name, yyyy is the year and hhmm the current time (UTC)
+in hours and minutes. To this, the satellite type, image channel
+(for NOAA) and the extension .pgm for images and .bin for recorded
+audio are appended, to form the file name. This is then pre-pended
+with images/ for image or record/ for recorded audio files so that
+they are saved in &lt;working-directory&gt;/images/ or
+&lt;working-directory&gt;/record/ respectively.
+&lt;working-directory&gt; is "xwxapt/" in the user's home
+directory.</p>
+<p>Before running xwxapt, it may be necessary to customize some
+entries in the xwxapt/xwxaptrc configuration text file in your home
+directory. These are the items that will need editing:<br></p>
+<ul>
+<li>The choice of an RTL-SDR receiver or Analogue receiver (default
+is SDR).</li>
+<li>The librtlsdr Device Index (the default is device 0).</li>
+<li>The Synthesizer Frequency Error correction factor (default is
+0).</li>
+<li>The Low Pass Filter cut-off Frequency (default is
+40000Hz).</li>
+<li>The ALSA sound card name (default is hw:0).</li>
+<li>The ALSA "channel" name (default is FRONT_LEFT).</li>
+<li>The capture source (default is Line).</li>
+<li>The capture volume control (default is Capture).</li>
+<li>The capture volume setting (default is 80%). If -- is set in
+the Capture volume control entry, xwxapt will not try to set
+Capture volume.</li>
+<li>The default duration of real-time operations (default is 600
+sec, e.g. 10 min).</li>
+</ul>
+<p>The color-mapping tables may also need editing to get realistic
+colors (this is especially true for the green color) but this is
+not easy. Its best done by waiting for clear and dry weather, and
+then using an application like the Gimp to measure the gray scale
+values in various regions of the image. By comparing the image with
+a color map (like satellite images in Google Maps (tm)) the gray
+level ranges corresponding to water bodies, forested areas, land,
+desert etc can be identified and entered in the color tables in
+~/xwxapt/xwxaptrc.</p>
+<p>Stereo mode (e.g. specifying a "channel" name other than MONO)
+allows the computer's sound card to be connected to two audio
+sources, without the need to move plugs or switch audio. In my case
+this allows me to feed audio from my ham radio receiver and a
+weather satellite receiver to the sound card separately.</p>
+<b>The GTK+ user interface:</b><br>
+xwxapt's Main window contains the following widgets:<br>
+<b>1.</b> An image viewer that displays decoded APT images at half
+the size of those saved to files on disk. When in real-time
+decoding, images are shown progressively at the rate of one line
+per second. Each pixel in the image viewer is the average of four
+pixels from the actual decoded image so each line in the main
+window is made from two lines of the APT image.
+<p><b>2.</b> Under the above viewer there are the following
+buttons:<br></p>
+<ul>
+<li>Receive: Starts real-time reception and decoding of APT
+images.</li>
+<li>Normalize: Enables brightness normalization of the completed
+APT images.</li>
+<li>Colorize: Enables pseudo-colorization of the completed APT
+images.</li>
+<li>Invert: Enables inversion (vertical flip) of the completed APT
+images.</li>
+</ul>
+<b>3.</b> To the right of the Image Viewer frame is the Control and
+Monitoring frame. This has the following control and monitoring
+widgets:
+<ul>
+<li>The Center Frequency entry widget, where the center frequency
+of the Tuner can be entered, with a resolution of 0.1kHz. Type the
+required center frequency and hit Enter to activate. It will only
+have effect if the "Receive" toggle button is active, as this also
+causes the opening and initialization of the RTL-SDR dongle.</li>
+<li>The Bandwidth entry widget. Here the required bandwidth
+(cut-off) of a two-pole Butterworth filter can be specified in kHz.
+Hit Enter to activate.</li>
+<li>A Label that shows the Tuner name, e.g. R820D etc.</li>
+<li>An indicator of the Frequency Offset between the Tuner center
+frequency and the incoming Signal frequency. This offset in the
+case of xwxapt is mainly due to Doppler shift of the satellite. The
+Check button next to this enables the automatic compensation of
+this offset. But unfortunately it seems to interfere with the
+timing of the date stream from the RTL device and to cause loss of
+sync of the picture. It is not enabled by default.</li>
+<li>The RTL2832 Digital AGC control. This enables or disables the
+DAGC function of the RTL2832 chip.</li>
+<li>The Tuner Gain frame contains an indicator for the current Gain
+of the Tuner, a Slider to select Gain manually and a check button
+to enable Manual gain control. Unfortunately the function that
+reads actual Tuner gain only seems to work in the manual mode. In
+auto mode it always seems to return 0.</li>
+<li>A sync detector status indicator and slider. This shows the
+condition of the sync detector - Search, Lock, Unlock and Stop, as
+well as the peak output level from the coherent filter that detects
+the APT sync train.</li>
+<li>An Audio Level Indicator progress bar which shows the deviation
+from the required audio input level. Clicking on the Start toggle
+button enables the audio level set-up function of xwxapt. Also
+during real-time image decoding, it indicates the signal input
+level as above.</li>
+</ul>
+<p><b>4.</b> A text view widget that is used by xwxapt to output
+messages relating to all aspects of its operation. All error
+messages are shown in red, successful actions in green and other
+information in black fonts.</p>
+<p><b>5.</b> On the right of the RTL_SDR Control frame there is the
+DFT Spectrum and the FM De-modulator Scope display frames. The
+Spectrum frame can show a Waterfall display of either the 2.4 kHz
+Sub-Carrier signal or the Tuner's Base-band output, which is really
+the DFT spectrum of the incoming VHF carrier. The Carrier Spectrum
+display works only from the RTL-SDR dongle.<br>
+The FM De-modulator Scope display shows the Amplitude of the
+detected 2.4kHz sub-carrier, either from the Sound card DSP or the
+RTL-SDR dongle.</p>
+<p><b>6.</b> A pop-up menu: This appears after a right-click on the
+main window and has the following items:<br></p>
+<div style="margin-left: 2em"></div>
+<ul>
+<li><b>Operation timer:</b> Opens a pop-up dialog for setting the
+duration (in minutes) of real-time operations.</li>
+</ul>
+<ul>
+<li><b>Start-Stop timer:</b> Opens a pop-up dialog for setting the
+start and stop times of real-time operations.</li>
+</ul>
+<ul>
+<li><b>Cancel timer:</b> Cancels the above timer. This will start
+any suspended operation that is selected.</li>
+</ul>
+<ul>
+<li><b>Satellite type:</b> Select satellite type - NOAA or
+Meteor.</li>
+</ul>
+<ul>
+<li><b>Decode from dsp:</b> Selects real-time image decoding by
+processing data from the sound card's dsp.</li>
+</ul>
+<ul>
+<li><b>Record to file:</b> Selects the recording of APT signals to
+a file on disk.</li>
+</ul>
+<ul>
+<li><b>Decode from file:</b> Selects the decoding of images from a
+pre-recorded APT signal.</li>
+</ul>
+<ul>
+<li><b>Stop:</b> Stop all current processes.</li>
+</ul>
+<p><b>Audio level set-up:</b> Weather satellites transmitting
+images in the APT format transmit in the 137 MHz band with
+medium-bandwidth (~40 kHz) FM modulation. The VHF carrier is
+modulated with a 2.4 kHz sub-carrier which in turn carries the
+image and related signals (sync train, Gray-scale wedge etc) as AM
+modulation. Considering the Doppler shift (~3 kHz) and possible
+errors in the receiver local oscillator(s) the recommended IF
+bandwidth for VHF APT reception is 50 kHz. Unfortunately few of the
+available popular receivers (scanners) have such a facility, so
+reception requires either a modification to the receiver or the use
+of wide-band FM modes. This results in a lot of interference (in my
+region at least) and more noise, resulting in poor image quality.
+However there are reasonably priced dedicated satellite receivers
+which can be used with excellent results (I use a Hamtronics
+R139).</p>
+<p>Before xwxapt is used to decode images or record samples with an
+analogue receiver, the sound card's recording source input,
+(usually "Line"), must be connected with the VHF receiver's o/p.
+The connection must be done with a suitable (normally 3.5 mm)
+stereo jack plug with either the left or right channel connected to
+the receiver's o/p if in stereo mode, or if in mono mode usually
+the left channel input should be used. Then the receiver's audio
+o/p level must be adjusted manually to the correct level as
+follows:</p>
+<p>Run xwxapt and start the audio level set-up function by either
+clicking on the 'Audio Level Indicator' slider, or by selecting the
+'Set up audio level' item from the pop-up menu. While a clear and
+strong signal is being received from a <i>NOAA-type satellite</i>,
+adjust the volume control of the receiver so that the Audio Level
+Indicator's slider is near its maximum position (aim for 80-90%).
+Generally the slider will move a little either side of the correct
+position but this is not a problem. Stop the audio level set-up
+function by either clicking on the 'Audio Level Indicator' slider
+again, or selecting the Stop item from the pop-up menu. This
+adjustment should normally be needed only once, although from time
+to time it may become necessary to re-adjust the receiver's
+level.</p>
+<p>To receive images with an RTL-SDR Dongle, it is only necessary
+to plug the dongle into a USB2 port and connect the antenna to it.
+Software wise, it is necessary to install librtlsdr which is
+nowadays available in most Linux distros. This depends on libusb
+but this is also usually installed by default in most distros.</p>
+<p><b>Direct real-time decoding:</b><br>
+<b>1.</b> Select the required satellite type from 'Satellite type'
+item in the pop-up menu (currently the choice is NOAA-18, NOAA-19
+or Meteor).<br>
+Also set the "Normalize images", "Colorize Images" and "Invert
+images" toggle buttons to the required state. "Normalize images"
+and "Colorize Images" are active by default so that images will be
+enhanced by a linear histogram normalization process and
+pseudo-colorized.</p>
+<p><b>2.</b> If required, set either the duration (in minutes) of
+the decoding operation with the 'Operation timer' menu item, or the
+start and stop times of decoding using the 'Start-Stop timer' menu
+item. Otherwise the default time-out (as set in , normally 9
+minutes) will apply to the operation.</p>
+<p><b>3.</b> Click on the Receive toggle button or select the
+'Decode from dsp' item from the pop-up menu. In the former case,
+xwxapt will use default image file names based on the current date
+and time and the satellite type, while in the latter a file
+selection dialog will open and a different file name may be
+specified. If the start-stop timer has been set, the decoding
+operation will be suspended till the start time.</p>
+<p><b>4.</b> When the decoding process is started, xwxapt will
+first synchronize the dsp buffer with the APT sync train and then
+start decoding the APT image(s) line by line. Half-sized image(s)
+are displayed in the main window progressively and every two APT
+lines, e.g. once per second. The decoding operation will either
+stop when it times out (as set up in step 2), or if needed it can
+be stopped by toggling the Receive button or selecting the 'Stop'
+menu item. This will also cause xwxapt to save image files to
+disk.</p>
+<p><b>Recording APT signals to disk:</b><br>
+The process of recording APT signals to a file on disk is very
+similar to direct decoding of images as above. The only difference
+is that this process can only be selected from the 'Record to file'
+item of the pop-up menu. The recording is done in a raw binary
+format (8 bits/sample at a sampling rate of 9600 s/sec) and without
+any compression of data so a recorded file can be quite large
+(about 4.5 Mb for a typical satellite pass). This facility is
+really only useful for debugging and testing.</p>
+<p><b>Decoding from a recorded APT signal:</b><br>
+This is done by selecting the 'Decode from file' menu item and then
+choosing the recorded APT file from the file selection dialog.
+Decoded image file names will have the same base string of the
+recorded file but with the appropriate satellite type and file
+extension appended. They will also be displayed at half size in the
+main window. PLEASE NOTE that only files recorded by xwxapt can be
+processed!</p>
+<p><a name="Bugs" id="Bugs"><b>6. Bugs and annoyances</b></a><br>
+I have fixed whatever bugs I came across testing xwxapt but there
+may be some hiding, waiting for the right conditions to appear.
+There is a little geometric distortion since an integer number of
+carrier samples must be summed in each pixel, but for a simple and
+efficient application, image quality is quite good at least as far
+as meteorological uses go.</p>
+<p>The hardest job xwxapt has to do is detecting the sync train
+included in APT transmissions. Although under good receiving
+conditions this seems to work very well, when there is some noise
+in the signal sync detection fails. However, under such conditions
+xwxapt continuous by 'dead reckoning' the sync train position so
+short-lived noise will not throw xwxapt out of sync
+permanently.</p>
+<p>Reading data from the sound card's dsp is done by an idle
+callback function and when the GTK+ GUI is busy, for example if
+xwxapt's window is moved around for a few seconds, then some dsp
+data is lost resulting in a loss of sync and spoiled images. So try
+to avoid any operations on your computer that can stall the sound
+card driver.</p>
+<p><a name="Version" id="Version"><b>7. Version history</b></a><br>
+<b>Version 0.1-beta</b> This is the first release of xwxapt and my
+first attempt at writing a significant GTK+ application. Please
+report any bugs and suggestions for future versions.</p>
+<p><b>Version 0.2-beta</b> Made some changes to the Start-Stop
+timer pop-up to stop reformatting of user input since it was
+activated by the loss of focus signal and so it tended to mess-up
+the data entry fields when the mouse was moved out of the
+window.<br>
+Removed some of the messages that were printed in the Messages
+window during sound-card set-up since they were not properly
+rendered anyway.</p>
+<p><b>Version 0.3-beta</b> Managed to patch-up the problem of
+erratic rendering of the Messages text viewer so I re-instated most
+of the messages that were removed in version 0.2!<br>
+Also corrected the #define of the version number string so that
+this is now correctly shown.</p>
+<p><b>Version 0.4-beta</b> Changed the process of configuring the
+package for compilation so that Glade's 'autogen' script is used to
+produce correct symlinks to 'automake' and a suitable 'configure'
+script.</p>
+<p><b>Version 0.5</b> Modified the sync train detection method so
+that the error in the dsp's sampling frequency is also measured.
+This error must be compensated to allow the sync detector to
+maintain lock during image decoding.</p>
+<p><b>Version 0.6</b> Changed the DSP sampling rate from 9600 to
+8000 samples/sec since this is one of the standard values. While
+doing this, also improved the stability of the NOAA sync detector
+and streamlined some code. <b>Please note</b> that all the changes
+needed to make xwxapt work with the new sampling rate have been
+tested only with NOAA apt transmissions. The code related to Meteor
+type satellites is untested, since there are currently no
+operational satellites of this type!</p>
+<p><b>Version 0.7</b> Improved sync detection to reduce possibility
+of incorrect measurement of dsp sampling rate error.</p>
+<p><b>Version 0.8</b> Changed the dsp sampling rate to 48000 Hz
+since an apparent bug in ALSA's re-sampling code produces
+pronounced artifacts (a pattern of lines) when using non-native
+sampling speeds. I chose 48 KHZ since this is apparently the only
+hardware speed available in the AC97 on-board sound of my
+motherboard. Luckily this speed seems available on most sound dsp
+chips.<br>
+Added pseudo-colorization code to produce colorized versions of the
+gray-scale images.<br>
+Consolidated and cleaned up a lot of the source code of xwxapt.</p>
+<p><b>Version 0.9</b> After a bug report from Juha Vierinen
+regarding seg faulting of xnec2c, my graphical adaptation of NEC2,
+I changed all "sprintf" commands to "snprintf" to avoid buffer
+overruns. Following on the above changes, I revised all similar
+situations in xwxapt source code and changed all "sprintf" commands
+to "snprintf" just in case. While going through the xwxapt source
+code, I also fixed some minor bugs like typos and tidied error
+messages and other aspects of the GUI.</p>
+<p><b>Version 1.0</b> After a bug report from Pino Zollo ZP4KFX
+regarding GUI problems with my Hellschreiber program xfhell, I made
+some changes to the GUI code in most of my GTK2 applications.</p>
+<p><b>Version 1.1</b> After a bug report from Pino Zollo ZP4KFX,
+regarding failure of "xdemorse" to start the Morse decoding loop
+after reading its configuration file, I have modified the functions
+that read xwxaptrc so that more detailed error messages are printed
+if entries are malformed.</p>
+<p><b>Version 1.2</b> Made the page size of spin buttons 0 to make
+setting of spin button values compatible with GTK 2.4.</p>
+<p><b>Version 2.0-beta</b> After many reports of difficulties
+and/or failure to set up and run xwxapt, due to poor or
+non-existent support for some sound cards in ALSA's OSS
+compatibility layer, I carried out major changes in xwxapt to use
+the ALSA sound API instead of the original OSS API. Because of very
+sparse or lacking documentation for the ALSA sound API, I had great
+difficulty getting xwxapt to work under ALSA, especially the Mixer
+interface. I am releasing wxwapt as version 2.0-beta for public
+testing, hoping it will be more successful with modern sound cards.
+Please don't blame me if it is not, even simple sound card
+programming with ALSA can be very difficult and/or tricky and
+buggy, since there are few if any tutorials available, especially
+for the Mixer interface.</p>
+<p><b>Version 2.1:</b> Made some changes to the source code to
+improve style and avoid warnings from cppcheck and clang analyzer.
+Also changed some string handling functions to safer ones, e.g.
+strcat() to strncat() etc.</p>
+<p><b>Version 2.2:</b> I have updated the basic files of the GNU
+Autotools build system, to be compatible with the current version
+of these tools at the time of writing (February 2013).</p>
+<p><b>Version 2.3:</b> I have fixed a number of defects reported by
+the source code auditing tools of the Coverity Scan website. These
+were mainly related to programming practices and did not affect the
+operation of this application.</p>
+<p><b>Version 2.4:</b> I made some changes to the Strlcat()
+function and its usage in the xwxapt code, to improve safe handling
+of string concatenation operations. Hopefully this has not broken
+the handling of various strings in xwxapt! ;-)</p>
+<p><b>Version 2.5-beta:</b> I have added support for librtlsdr so
+that compatible RTL-SDR dongles can be used to receive APT images.
+The User Interface had to be modified extensively to accommodate
+the various new controls and indicators needed.</p>
+<p><b>Version 2.6-beta:</b> Fixed a bug that caused xwxapt to save
+the pseudo-colorized NOAA image in the current directory rather
+than in ~/xwxapt/images/, when decoding images from a samples file.
+Also corrected the pseudo-colorized file extension to .ppm. Also
+fixed a bug the caused xwxapt to produce an error message, when
+reaching the end of the file while decoding images from a samples
+file.</p>
+<p><b>Version 2.7:</b> Fixed errors in the code that handles
+operation timer functionality. These apparently happened during the
+overhaul of the callbacks.c file, resulting in failure of the
+timing functions. Modified the code that displays the Scope Display
+of the Demodulator output. It now shows most of the NOAA image
+line's signal.</p>
+<p><b>Version 2.8:</b> Added support for librtlsdr so that xwxapt
+can receive signals from weather satellites using RTL-SDR
+dongles.</p>
+<p><b>Version 2.9:</b> Changed thread synchronization from using
+mutex to using semaphore, seems less affected by processor
+workload.</p>
+<p><b>Version 3.0:</b> I updated the GUI code to the latest
+GTK+-3.22. This made it necessary to make minor changes to the User
+Interface but functionality remains the same. An advantage of this
+version is that the GUI specification is in a Glade-3 XML file in
+the ~/xwxapt/ folder (xwxapt.glade), and this can be edited in
+Glade-3 if some cosmetic changes are desired. I migrated the
+internationalization system from "intltoolize" to GNU GetText, as
+the former is now considered obsolete. Also replaced the autogen.sh
+script with a newer version.</p>
+<p><b>Version 3.1:</b> I fixed a buffer overrun bug that was
+causing crashes with memory corruption error messages. Don't know
+how it got away and the application was released buggy, so my
+apologies to anyone that tried version 3.0!.</p>
+<p><b>Version 3.2:</b> I have fixed a bug in the calculation of
+phase changes in the FM Detector that demodulates the
+sub-carrier.</p>
+<p><b>Version 3.2.1:</b> I edited Makefile.am so that make install
+will now place relevant application files (documentation, pixmaps,
+desktop file, glade UI file etc) into the right places.</p>
+<p><b>Version 3.3:</b> The fix in version 3.2 apparently was not
+quite right so I made changes to the code to fix it properly.</p>
+<p><b>Version 3.4:</b> I replaced the integer DFT functions with an
+open-source integer FFT function I found on the internet. This I
+had to modify to fit the needs of this application and this change
+resulted in a worthwhile reduction of processor workload.</p>
+<p><b>Version 3.4.1:</b> I have separated the pseudo-colorization
+code for the waterfall into a separate function and edited it to
+improve the colorization algorithm.</p>
+<p><b>Version 3.4.2:</b> I fixed a bug in the Chebyshev filter
+initialization function that resulted in memory leaks if the filter
+bandwidth was changed by the user.</p>
+<p><b>Version 3.4.3:</b> Changed the installation commands in
+Makefile.am so that all the relevant files (desktop file,
+application pixmap, configuration file, executable binary etc) are
+installed under any location specified to the configure script by
+the --prefix= option. Also modified the program so that on first
+start up after installation, the application will create its
+working directory by copying files from the relevant directories
+under the installation prefix.</p>
+<p><a name="Copying" id="Copying"><b>8. Copying</b></a> This
+software package is released under the GNU Public License. Please
+see the COPYING file for more details.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details</p>
+</body>
+</html>

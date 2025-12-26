@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pkexec alsa force-reload
+

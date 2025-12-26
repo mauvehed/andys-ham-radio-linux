@@ -1,0 +1,59 @@
+/* $Id$ */
+
+Audio FSK support in OWX has been added to aid in programming radios in 
+the field, using only a smartphone and a simple, microcontroller-based 
+programmer, which will be designed at a later time. Using owx-fsk it is 
+possible to convert binary files to files that can be played to the 
+programmer through a speaker or an audio jack of the smartphone in the 
+field. Programmer then demodulates the tones and programs the radio. In 
+fact, any binary file (not only Wouxun memory file) can be converted to 
+AFSK using owx-fsk tool.
+
+owx-fsk should be used as a filter. It reads binary data from stdin and 
+outputs raw data that should be fed to a lossless audio encoder. Example:
+
+owx-fsk < data.bin | sox -t raw -b 16 -c 1 -e unsigned-integer -r 44100 - out.wav
+ 
+Data format is 16-bit, little-endian, unsigned integer, monaural data 
+sampled at 44100 Hz.
+
+This file describes how exactly binary data is modulated.
+
+Modulation is a three-layer process. First layer is a Bell 202 modem 
+modulation, the same that is used for APRS. It uses 1200 Hz tone for mark 
+(binary 1), 2200 Hz tone for space (binary 0) and each of these tones 
+lasts for 833 us (1/1200s), giving a bitrate of 1200 bps.
+
+Second layer is the bi-phase (Manchester coding) layer. It encodes each 
+input bit into two output bits. Bit '0' is encoded as '10' and bit '1' is 
+encoded as '01'. This way it is much easier for a decoder to keep it's 
+clock in sync with the signal clock. First bit will always be '0', because 
+LSB of the sync byte is '1', which translates to '01'.
+
+Third layer is a packet layer. It defines packets.
+
+In OWX, bytes are encoded LSB first and multi-byte variables are encoded 
+in little-endian order. Also after each byte a parity byte follows. Parity 
+chosen is an even-parity. It means that if a byte has an odd count of '1' 
+bits, then parity byte is set to '1' to make it even, otherwise it is set 
+to '0'.
+
+OWX adds the concept of a packet. A packet consists of a header and packet 
+payload. Header consists of:
+
+- sync byte (0x53, that is ascii 'S')
+- index byte (0x00 - 0xFF, then rolls back to 0x00)
+- type byte (0x00 - start, 0x01 - data, 0x02 - end)
+- payload size byte (one byte, 0x00 - 0xFF, for packets other than 0x01 it is 0x00)
+- crc16 (two bytes; crc16 includes header - for calculation crc is 0x0000)
+- payload (if payload size is greater than 0x00)
+
+This way we are able to detect any error during the transmission.
+
+Output sound can be summarized as:
+
+- 1s of lead-in (mark tone)
+- bi-phase encoded start packet
+- bi-phase encoded data packets
+- bi-phase encoded end packet
+- 1s of lead-out (mark tone)

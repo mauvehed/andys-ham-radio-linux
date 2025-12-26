@@ -1,0 +1,19 @@
+
+HOWTO M17
+=========
+
+0) Run /usr/local/bin/init_m17client_config_dir to create $HOME/.config/m17client.
+   This script will also copy /usr/local/share/m17client/*.ini into that directory.
+   Obviously, only run this script the VERY FIRST time.
+
+In the Digital_Modes -> M17 Menu:
+  * M17 Client
+  * M17 GUI
+  * M17 TS
+  * mvoice
+  * droidstar
+
+Andy
+KB1OIQ
+31-Mar-2023
+

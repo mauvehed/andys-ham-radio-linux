@@ -1,0 +1,142 @@
+#!/bin/sh
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory ARRL_teachers_institute.directory \
+				 /usr/local/share/applications/AIS-catcher.desktop \
+				 /usr/local/share/applications/arduino.desktop \
+				 /usr/local/share/applications/chirp.desktop \
+				 /usr/local/share/applications/direwolf.desktop \
+				 /usr/local/share/applications/gnuradio-grc.desktop \
+				 /usr/local/share/applications/gpredict.desktop \
+				 /usr/local/share/applications/notepadqq.desktop \
+				 /usr/local/share/applications/putty.desktop \
+				 /usr/local/share/applications/satdump.desktop \
+				 /usr/local/share/applications/sdrpp.desktop \
+				 /usr/local/share/applications/virtual_radar_server.desktop \
+				 /usr/local/share/applications/yaac.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Antenna.directory \
+				 /usr/local/share/applications/antscope2.desktop \
+				 /usr/local/share/applications/flaa.desktop \
+				 /usr/local/share/applications/Fl_Moxgen.desktop \
+				 /usr/local/share/applications/rf_exposure_calc.desktop \
+				 /usr/local/share/applications/xnec2c.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory CW.directory \
+				 /usr/local/share/applications/ebook2cwgui.desktop \
+				 /usr/local/share/applications/flwkey.desktop \
+				 /usr/local/share/applications/morse_runner.desktop \
+				 /usr/local/share/applications/qrq.desktop \
+				 /usr/local/share/applications/xcwcp.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Digital_Modes.directory \
+				 /usr/local/share/applications/direwolf.desktop \
+				 /usr/local/share/applications/flamp.desktop \
+				 /usr/local/share/applications/flamp.desktop \
+				 /usr/local/share/applications/flarq.desktop \
+				 /usr/local/share/applications/fldigi.desktop \
+				 /usr/local/share/applications/fldigi.desktop \
+				 /usr/local/share/applications/flmsg.desktop \
+				 /usr/local/share/applications/flmsg.desktop \
+				 /usr/local/share/applications/flwrap.desktop \
+				 /usr/local/share/applications/freedv.desktop \
+				 /usr/local/share/applications/glfer.desktop \
+				 /usr/local/share/applications/gridtracker2.desktop \
+				 /usr/local/share/applications/js8call.desktop \
+				 /usr/local/share/applications/jtdx.desktop \
+				 /usr/local/share/applications/MSHV.desktop \
+				 /usr/local/share/applications/qsstv.desktop \
+				 /usr/local/share/applications/qtel.desktop \
+				 /usr/local/share/applications/wsjtx.desktop \
+				 /usr/local/share/applications/wsjtx_improved.desktop \
+				 /usr/local/share/applications/xwefax.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Documentation.directory \
+				 /usr/local/share/applications/Andy_Ham_Radio_Linux.desktop \
+				 /usr/local/share/applications/Dire_Wolf_Docs.desktop \
+				 /usr/local/share/applications/Other_Ham_Radio_Docs.desktop \
+				 /usr/local/share/applications/W1HKJ_docs.desktop \
+				 /usr/local/share/applications/xastir_doc.desktop \
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Documentation.directory Command_Line_Docs.directory \
+				 /usr/local/share/applications/aa-analyzer_doc.desktop \
+				 /usr/local/share/applications/acarsdec.desktop \
+				 /usr/local/share/applications/ardop.desktop \
+				 /usr/local/share/applications/atlc_1.desktop \
+				 /usr/local/share/applications/dump1090_doc.desktop \
+				 /usr/local/share/applications/gpsman_doc.desktop \
+				 /usr/local/share/applications/ibp_doc.desktop \
+				 /usr/local/share/applications/linpac_doc.desktop \
+				 /usr/local/share/applications/ngspice_doc.desktop \
+				 /usr/local/share/applications/qrq_doc.desktop \
+				 /usr/local/share/applications/splat_doc.desktop \
+				 /usr/local/share/applications/wwl_doc.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Electronic_Design.directory \
+				 /usr/local/share/applications/arduino.desktop \
+				 /usr/local/share/applications/coil64.desktop \
+				 /usr/local/share/applications/org.fritzing.Fritzing.desktop \
+				 /usr/local/share/applications/org.kicad.gerbview.desktop \
+				 /usr/local/share/applications/gspiceUI.desktop \
+				 /usr/local/share/applications/org.kicad.kicad.desktop \
+				 /usr/local/share/applications/org.kicad.pcbnew.desktop \
+				 /usr/local/share/applications/qttinysa.desktop \
+				 /usr/local/share/applications/Smith_Chart.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory HF_Propagation.directory \
+				 /usr/local/share/applications/flcluster.desktop \
+				 /usr/local/share/applications/hamclock.desktop \
+				 /usr/local/share/applications/ibp.desktop \
+				 /usr/local/share/applications/pskreporter.desktop \
+				 /usr/local/share/applications/qgrid.desktop \
+				 /usr/local/share/applications/Solar_Data.desktop \
+				 /usr/local/share/applications/sunclock.desktop \
+				 /usr/local/share/applications/voacap.desktop \
+				 /usr/local/share/applications/Xdx.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Logging.directory \
+				 /usr/local/share/applications/cqrlog.desktop \
+				 /usr/local/share/applications/fllog.desktop \
+				 /usr/local/share/applications/flnet.desktop \
+				 /usr/local/share/applications/klog.desktop \
+				 /usr/local/share/applications/not1mm.desktop \
+				 /usr/local/share/applications/qlog.desktop \
+				 /usr/local/share/applications/tqsl.desktop \
+				 /usr/local/share/applications/xlog.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory M17.directory \
+				 /usr/local/share/applications/mvoice.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory NBEMS.directory \
+				 /usr/local/share/applications/flamp.desktop \
+				 /usr/local/share/applications/fldigi.desktop \
+				 /usr/local/share/applications/flmsg.desktop \
+				 /usr/local/share/applications/sylpheed.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Rig_Control.directory \
+				 /usr/local/share/applications/chirp.desktop \
+				 /usr/local/share/applications/flrig.desktop \
+				 /usr/local/share/applications/grig.desktop \
+				 /usr/local/share/applications/wfview.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Satellites.directory \
+				 /usr/local/share/applications/Fox_Telemetry.desktop \
+				 /usr/local/share/applications/gpredict.desktop \
+				 /usr/local/share/applications/satdump.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory SDR.directory \
+				 /usr/local/share/applications/Dream.desktop \
+				 /usr/local/share/applications/gnuradio-grc.desktop \
+				 /usr/local/share/applications/gqrx.desktop \
+				 /usr/local/share/applications/linrad.desktop \
+				 /usr/local/share/applications/quisk.desktop \
+				 /usr/local/share/applications/sdr_cleanup.desktop \
+				 /usr/local/share/applications/sdrpp.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Tracking.directory \
+				 /usr/local/share/applications/AIS-catcher.desktop \
+				 /usr/local/share/applications/virtual_radar_server.desktop \
+				 /usr/local/share/applications/xastir.desktop \
+				 /usr/local/share/applications/yaac.desktop
+
+xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Workarounds.directory \
+				 /usr/local/share/applications/fix_sound.desktop

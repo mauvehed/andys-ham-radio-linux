@@ -1,0 +1,173 @@
+Increase Your CW Speed with Wordsworth
+======================================
+
+George (K1IG) won the QST Cover Plaque for the May 2017 edition
+with his article, "Increase Your CW Speed with Wordsworth", found
+on page 74 of that magazine.
+
+George (K1IG) had the idea to learn morse code in a different way. To
+improve ragchewing, listen to an entire word at the normal speed, and
+leave extra spaces between words. Teach the mind to interpret words
+without mentally spelling them. George coined the expression "wordsworth",
+partly as a play on "Farnsworth", but also as a pun, since we're trying
+to learn to mentally process a word's worth of information at a time.
+
+Andy (KB1OIQ) wrote two simple Perl scripts to help with this idea. One
+script creates a list of words which come from several different built-in
+lists. The second script takes any text as input, strips out certain
+punctuation, and then adds spacing between the words. Cut/paste either
+of these into Fldigi, and have it create the CW sounds while you listen
+and train your mind in a new way.
+
+One could use text from Project Gutenberg, for example, as input to the script.
+
+Learning CW via the Wordsworth Method
+=====================================
+
+George (K1IG) has come up with a different way to learn CW (morse code).  He
+calls it the "Wordsworth" method.  
+
+"Farnsworth" is the method many people use, where additional space is placed
+between individual letters.
+
+"Wordsworth" is a method where the additional space is placed after each word.
+There is no extra space placed between the letters.  This distinguishes this
+method from the "Farnsworth" method.
+
+In the military, where many people learned CW, the skill of writing or typing
+a character at a time *accurately* was very important!  Often, CW transmissions
+were encoded, so learning words was irrelevant.  "HALWAL", that is, hear a
+letter, write a letter, may be OK for callsigns, but falls apart under these
+conditions:
+
+a) neither a writing instrument nor paper are available
+b) when the CW speed exceeds one's ability to write it down
+
+Comprehension often doesn't occur until one reads that which has been written,
+which slows down the natural flow of the communication.
+
+Today, learning "HALWAL" may not be the most helpful for people who are
+interested in ragchewing.  A different method is thus proposed:  Wordsworth.
+
+Consider what we did when learning English, perhaps as a young child:
+
+a) learned how to recognize, say, and draw each letter of the alphabet
+b) put the letters together into simple words, e.g. "Hop on Pop"
+c) read individual words in a sentence
+d) comprehend the sentence as a whole, where thoughts and ideas pops into
+   our heads
+
+How does this apply to the Wordsworth Method:
+
+a) one must still learn each letter individually and at a reasonable speed
+   (e.g. 15 WPM) before the Wordsworth Method can be applied.
+
+b) put additional spaces between words
+
+c) mentally copy words as a group, **without** spelling the letters in your head
+
+d) eventually, the listener's brain acclimates to this and the sentences and meanings
+   appear in one's head, just like when listening to someone speak the language
+
+How can this be accomplished?
+
+a) two Perl scripts have been supplied:  gen_cw_words.pl and text_to_cw.pl
+
+b) these Perl scripts have been tested on Linux but should work in any operating
+   system that supports Perl
+
+c) the scripts are designed to be used from the command line
+
+gen_cw_words.pl
+===============
+
+Generate words for CW practice.  There are lists of words built into this script.
+  - CW words, such as 73, CQ, SK
+  - common English 2-letter words
+  - common English 3-letter words
+  - common English 4-letter words
+  - individual English letters/numbers
+  - list of names
+
+The code is trivially simple so please modify it to meet your needs!
+
+Command line:
+  ./gen_cw_words.pl -h or --help
+
+                    -n or --num     number of words to generate
+                                    defaults to 50
+
+                    -r or --repeat  number of times to repeat each word
+                                    defaults to 1
+
+                    -l or --list    list from which to choose the words
+                                    e.g. letter, cw, name, two, three, four
+
+  The output goes to STDOUT, but one could redirect it to a file, or pipe
+  it to another command (more on that shortly).
+
+text_to_cw.pl
+=============
+
+This script massages words into something useful for CW practice.  First,
+punctuation uncommon to CW is removed.  Then, spacing is added between
+each word as described for the Wordsworth Method.
+
+Command line:
+  ./text_to_cw.pl --help
+                  --input <infile>  file containing text to process
+                                    if not specified, defaults to STDIN
+                  --spaces <n>      number of spaces to put between each word
+
+  Input can come from STDIN or a file.  Output goes to STDOUT, but one can
+  redirect it to a file if desired.
+
+Usage Examples
+==============
+
+./gen_cw_words.pl -l cw -r 3 -n 5
+QRZ QRZ QRZ CUL CUL CUL TEMP TEMP TEMP YRS YRS YRS QRM QRM QRM 
+
+./gen_cw_words.pl -l name -r 2 -n 6
+Vlad Vlad John John Mike Mike Gary Gary Bob Bob Tim Tim 
+
+./gen_cw_words -l cw -r 3 -n 3 | ./text_to_cw -s 3
+QRQ   QRQ   QRQ   PSE   PSE   PSE   WATT   WATT   WATT   
+
+cat Pride_and_prejudice.txt | ./text_to_cw -s 3 | head -20
+<lots of text appears>
+
+The Last Step
+=============
+
+Now that lots of practice words can be generated, cut/paste those words
+from your terminal into the Fldigi program.
+
+1) Start up Fldigi
+
+2) Change the Op_Mode to CW
+
+3) Paste the text into the transmit window
+
+4) Set the desired CW speed (lower left corner of the Fldigi GUI)
+
+5) Press the TX macro key and listen to the CW sounds from your speaker.
+
+6) Put your mind into a calm state (even close your eyes).  Don't force
+   yourself to comprehend, just let the code flow into your ears and into
+   your mind.  Try to hear words, not letters.  Break the habit of spelling
+   words in your mind!
+
+7) This takes lots of practice, but soon your mind will recognize common 
+   words like: CQ, 73, SK, the, name, qth, rig, ant, rst
+
+George (K1IG) came up with this idea and presented it to me.  Andy (KB1OIQ) 
+wrote the Perl scripts and has been practicing with this method.
+
+I (Andy) am improving but still need a lot more practice.  My goal is to
+ragchew with "head copy" only.
+
+Thanks, and 73,
+
+George (K1IG)
+Andy (KB1OIQ)

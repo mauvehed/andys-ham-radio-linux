@@ -1,0 +1,12 @@
+/* $Id$ */
+
+- add support to Windows .tw files
+- add support to DCS
+- add support to TEAM 2 broadcast bank
+- port autodetection (probably as a shell script)
+- make installation more flexible (instead of hard-coded /usr/local/)
+- install documentation as well as binaries
+- write manual page/pages
+- some autoconf/automake machinery (is it really needed?)
+- i18n (see intl.h)
+- grep for xxx in sources - these are places to return to

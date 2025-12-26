@@ -1,0 +1,100 @@
+
+Brief description of the available ham radio software
+=====================================================
+
+AIS-catcher              - plots ships on a map
+aa_analyzer              - command line program used with RigExpert AA-xxx analyzers
+antscope2                - used with RigExpert antenna analyzers
+ardop                    - Amateur Radio Digital Open Protocol (used with WinLink)
+arduino                  - program your Arduino single board computer
+atlc                     - Arbitrary Transmission Line Calculator
+chirp                    - program your HT
+coil64                   - coil inductance calculator
+country_files            - list of callsign prefixes and country of origin
+cqrlog                   - a full featured QSO logging program
+cwwav                    - command line program to convert text files to CW wav or mp3
+direwolf                 - soundcard TNC for APRS
+dream                    - digital radio mondiale receiver
+dump1090_mutability      - ADSB reception
+ebook2cwgui              - convert Ebook files to CW (get free ones at http://www.gutenberg.org/ebooks/)
+flaa                     - GUI for use with RigExpert AA-* antenna analyzers
+flamp                    - NBEMS program for Amateur Multicast Protocol (AMP)
+flarq			 - ensures error free data transfer when coupled with fldigi
+flcluster                - access DX cluster nodes
+fldigi                   - digital modes such as PSK31 (NBEMS)
+fllog                    - to provide a common log across networked computers
+flmoxgen                 - Moxon Rectangle antenna design program
+flmsg                    - a simple forms management editor for standard message formats (NBEMS)
+flnet                    - a net control logging program by W1HKJ
+flrig                    - rig control
+flwkey                   - modem program for the K1EL Winkeyer series
+flwrap                   - companion to fldigi, file encapsulation / compression
+foxtelem                 - Satellite Telemetry decoder
+freedv                   - SSB low bit rate digital voice
+fritzing                 - turn circuits into custom made PCBs
+glfer                    - QRSS (slow CW) or DFCW (Dual Frequency CW) modes
+gnuradio                 - GNU software defined radio
+gpredict                 - satellite tracking
+gpsman                   - graphical manager of GPS data
+gqrx                     - software defined radio receiver
+gridtracker              - track grids on a beautiful map
+grig                     - rig control software
+gsmc                     - Smith Chart calculator for impedance matching
+gspiceui                 - GUI interface for spice
+hamclock                 - graphical clock, solar data, grey line, and more
+ibp                      - HF beacons
+js8call                  - Amateur Radio Digital Mode providing weak signal messaging
+js8spotter		 - companion program to js8call
+jtdx                     - supports JT9, JT65, T10, and FT8 digital modes for HF amateur radio
+kicad                    - electronic design automation and schematic capture
+klog                     - logging program
+libhamlib4               - radio control library
+linpac                   - packet radio ax.25 software
+linrad                   - SDR receiver
+morse_runner             - morse code contest practice
+mshv                     - FT8 and other digital modes, similar to wsjt-x
+mvoice                   - M17 codec2 digital voice and data
+nanovna-saver		 - software for the NanoVNA device
+ngspice                  - Spice circuit simulator
+noaa_apt                 - receive and display NOAA satellite pictures in APT format
+not1mm                   - contest logger
+open_wouxon              - Open Wouxun, command line programs for Wouxun HTs
+qgrid                    - Maidenhead grid squares calculator
+qlog                     - logging software
+qrq                      - CW callsign practice
+qsstv                    - SSTV (analog AND digital)
+qtel                     - Echolink client
+qttinysa                 - Qt graphical program for the TinySA 
+quisk                    - software defined radio receiver
+rf_exposure_calc         - compute RF Exposure for antennas and power levels
+SatDump                  - satellite tracking
+SDR++                    - SDR application
+solar_data               - quick glimpse at solar indicies
+splat                    - command line HF propagation prediction
+sunclock                 - track day/night line on Earth
+svxlink                  - Echolink server
+sylpheed                 - email tool used with NBEMS
+svxreflector             - Conference server for SvxLink amateur radio servers
+tqsl                     - used with ARRL Logbook of the World
+Virtual Radar Server     - aircraft tracking
+wfview                   - Waterfall viewer (and other rig control) for modern ICOM rigs
+wordsworth               - learn CW a "wordsworth" at a time
+wsjtx                    - weak signal communication - JT9,JT65,FT8
+wwl                      - compute distance between Maidenhead grids
+xastir                   - APRS mapping
+xcwcp                    - CW code practice
+xdx                      - DX cluster TCP/IP client
+xlog                     - logging program for casual operators
+xnec2c                   - antenna modeling software
+xwefax                   - display Wefax and Radiofax images
+xwxapt                   - display APT images from weather satellites
+yaac                     - Yet Another APRS Client
+
+TO BE FIXED
+===========
+
+mfc_gpl                  - Bionics MicroFox config program (GPL)
+tt3_gpl                  - Byonics TinyTrak3 Configuration GUI
+
+
+AMS 29-Nov-2025

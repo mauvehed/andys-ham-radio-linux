@@ -1,0 +1,18 @@
+Before starting the virtual machine containing AHRL, go into the virtual 
+machine settings and click on "Display". Where it says "graphics controller",
+choose VMSVGA. Also choose 128MB of video memory, and one monitor. Click "OK".
+
+Now, boot AHRL in the virtual machine you just configured.  Login and see the
+default desktop.
+
+From the top left corner, click the blue circle icon, which brings up the menu.
+  * Menu-> Settings -> Display
+  * Pick the desired resolution from the "Resolution" menu
+
+This works on AHRL v25.
+
+Have fun and 73,
+
+Andy
+KB1OIQ
+June 2022

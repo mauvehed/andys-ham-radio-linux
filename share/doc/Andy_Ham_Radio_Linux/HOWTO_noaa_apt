@@ -1,0 +1,47 @@
+HOWTO receive NOAA APT weather satellite images
+===============================================
+
+1) The correct antenna is very important!  I built a quadrifilar helix antenna
+   with the encouragement of my friend John (G3BVU SK).  Other types of antennas
+   could also be used.
+
+2) Start the gqrx program and tune it near the satellite frequency.  I use the
+   bookmarks feature of gqrx, but gpredict could also be used to control the
+   frequency in gqrx (due to doppler shift).  I recommend using gpredict and gqrx
+   together.
+
+3) In gqrx, the satellite transmission is a "narrow FM" signal which requires
+   a filter width of 40 kHz.  Be sure to set this manually prior to receiving
+   the satellite signal.
+
+4) When AOS begins, be sure that the frequency, mode, and filter width are correct.
+   Press the "Rec" button in the audio tab of gqrx.  This will create a wav
+   formatted audio file.  During AOS, listen for the characteristic tones
+   associated with the transmission.  When LOS occurs, press the "Rec" button
+   again to close the wav file.
+
+5) The wav file recorded by gqrx needs to be converted into a format acceptable
+   to atpdec.  The sox program will do this easily:
+   For example:  sox input.wav output.wav channels 1 rate 11025
+
+   sox gqrx_output.wav sox_output.wav channels 1 rate 11025
+
+6) To view the received image, start the atpdec program.  Open the wav file that
+   was just created by sox.  The atpdec software will put the image into the
+   directory specified by "-d".
+
+   atpdec -s 18 -i ab sox_output.wav -d images
+
+7) Alternatively, one could use these GUI based programs, both of which can
+   be found in the Satellites menu:
+
+   * xwxapt - be sure to do these preliminary steps:
+     * mkdir ~/xwxapt
+     * cp /usr/local/share/xwxapt/xwxaptrc ~/xwxapt/
+     * Then, run xwxapt, either from the menu or the command line
+
+   * noaa-apt
+   
+Andy
+KB1OIQ
+07-Jun-2020

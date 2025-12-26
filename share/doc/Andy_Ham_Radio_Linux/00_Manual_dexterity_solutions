@@ -1,0 +1,90 @@
+From Andy (KB1OIQ):
+
+I have friends with manual dexterity issues.  Their hands just aren't as steady
+as they were in their younger days.  Sometimes, these issues are caused by
+ailments such as Parkinson's disease.
+
+Then, there are those with eyesight issues, where larger fonts and larger icons 
+would be of great benefit.  While easier to see, these settings cause graphical
+elements to be larger and perhaps easier to hit with the mouse pointer.
+
+Another issue is those exceedingly small areas on the edge of the window.  It 
+is very difficult for many people to line the mouse up on the window's edge
+in order to resize the window.
+
+Many of these issues are exacerbated by the very high resolution monitors
+that exist today.  Each time we get a new monitor, everything seems to get
+smaller.
+
+My friends with these issues have asked me what can be done in Andy's Ham Radio
+Linux (AHRL) to make it easier for them to use.  I've collected some ideas for
+the xfce versions of AHRL (v23a and greater). 
+
+a) In the Settings menu, choose Appearance.  There are 4 tabs:
+       * Style    - pick a color scheme that is to your liking
+       * Icons    - pick an icon style that is pleasing to you
+       * Fonts    - change both the "Default Font" and the "Default Monospace Font" to
+                    a larger size (try 14 for starters)
+       * Settings - one can change the Toolbar Style here, but I'm not sure
+                    it helps
+
+b) Moving/resizing a window - there are several possibilities:
+     * Resizing a window:
+ 
+       * Move the mouse cursor to any place in a window that you'd like to resize
+       * press ALT-F8 on your keyboard
+       * the mouse cursor will jump to the lower right corner of the window
+       * move the mouse to resize the window
+       * click the left mouse button when finished
+
+    * Moving a window
+       * Move the mouse cursor to any place in a window that you'd like to move
+       * Press and hold the ALT key while pressing the left mouse button
+       * Move the mouse until the window is at the desired location
+       * Let go of the left mouse button and the ALT key
+
+    * Another way to resize a window
+       * Move the mouse cursor to any place in a window that you'd like to resize
+       * Press and hold the ALT key while pressing the RIGHT mouse button
+       * Move the mouse until the window is the desired size
+       * Notice that the location of the mouse cursor determines the direction
+         in which the window is resized (horizontal, vertical, both)
+
+c) Place commonly used menu items directly onto the desktop.  The desktop icon
+   is likely to be larger than the equivalent menu item.
+
+    * Go into the menu and place the mouse cursor onto a frequently used program
+    * Instead of clicking quickly with the left mouse button, press and hold
+      the left mouse button.
+    * While continuing to press the left mouse button, move the mouse cursor
+      and drop the item onto the background.
+    * An icon should appear - double click that icon, and the desired program
+      will be executed.
+    * If a popup window appears, click "Mark Executable".  This will only be
+      necessary the very first time.
+
+d) Another issue for many people is that the window's title bar is too small,
+   and the buttons which minimize, maximize, roll up, and terminate are also too
+   small.  I believe these are collectively called "window decorations".  There's
+   a way to modify the size of these objects:
+
+    * In the menu, choose Settings -> Window Manager.
+    * Click the first tab on the left which says "Style".
+    * Choose a theme that creates the window decorations of the desired size.
+      Examples:  Default-hdpi, Default-xhdpi, and Greybird-accessibility
+    * If you don't like the available choices, install additional themes
+      and see if you can find one to your liking.  
+
+e) The desktop icons which launch applications are too small.
+    * Follow this procedure to change the size of the desktop icons
+    * Go to the menu and choose: Settings -> Desktop.
+    * Click the third tab: Icons
+    * Change the Icon size to something larger, perhaps 72.
+    * Change this value until the icons are the desired size.
+    * You might also choose to check the box next to this item:
+      Single click to activate items (no more double clicking!)
+
+If you have helpful suggestions, please send them to me, so I can add them to
+this list.  Thanks, and 73!
+
+AMS 02-April-2020

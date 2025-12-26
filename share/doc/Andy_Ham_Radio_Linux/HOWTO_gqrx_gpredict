@@ -1,0 +1,80 @@
+HOWTO use gqrx and gpredict together, and why
+=============================================
+
+gqrx can be used to tune in a satellite transmission,  but does not compensate
+for doppler shift.  One could attempt to compensate manually by following the
+signal on the waterfall, but there is a different way.
+
+gpredict knows all about satellites and doppler shift.  It also knows how to
+control a radio, such as gqrx.  If both programs are run simultaneously, 
+gpredict can send frequency adjustment commands to gqrx to compensate for 
+doppler shift.  Magic!  
+
+Here is what I did, and it worked well for me.
+
+* Start the gqrx program, and tune it to the frequency of the desired 
+  satellite.  Set the mode in the receiver options tab.  Confirm the
+  satellite's frequency on the internet.  I've seen cases where the
+  TLE file (for gpredict) disagrees with the frequency posted on the internet.
+  If unsure, be prepared to try both frequencies, or carefully observer
+  the waterfall during the satellite pass.
+
+* Start the gpredict program.  Setup the software so that the desired satellite
+  is shown in the current module.  Press the button in the module that looks
+  like a downarrow inside of a square box.  This will bring up a menu (I'll
+  call it the module drop down menu) in which "Radio Control" is to be selected.
+  If a popup appears indicating that a radio needs to be configured, do so as
+  follows.
+
+* Configuring a radio in gpredict - go to the Edit -> Preferences menu.
+  Select interfaces, and choose the "Radios" tab.  Then, click "Add New".
+  For the name, I choose "gqrx".  Be sure to set the port to 7356.  It must
+  match the port number in the gqrx remote control port settings.  I left
+  the other settings at their default values.  Click OK when finished.
+
+* In gpredict, in the module drop down menu, choose "Radio Control".
+  Select the target satellite, and verify the correct downlink frequency.
+  Click "Track".  Notice on the uplink side of the window that there 
+  is now a device called "gqrx".  Click "Engage".
+
+* In gqrx, there is a GUI button to "configure remote control settings".
+  Click that button and verify that the "listen on port" number 
+  (7356 by default) matches the port number that was configured into 
+  gpredict.  Also, be sure to add 127.0.0.1 as an allowed host.  Click
+  OK when finished.
+
+* Lastly, in gqrx, click the GUI button to enable remote control via
+  TCP.  The button will stay depressed, indicating that remote control
+  has been enabled.
+
+* Go back to gpredict and verify that the "Engage" button is still pressed.
+
+* Lastly, go to gqrx and see that the frequency is changing perhaps once 
+  per second, under control of gpredict.
+
+* Congratulations!  I hope this has worked for you.  If not, please
+  go through the instructions again.  It is also possible that something
+  in your situation is different from mine, requiring a minor adjustment.
+  It is my hope that these instructions have gotten you close to the
+  solution for you.
+
+* To "break the connection", click the gqrx button that enabled remote
+  control via TCP.  The button will no longer look depressed, and that
+  should also cause the "Engage" button in gpredict to no longer be
+  selected.
+
+Have a lot of fun, and 73,
+
+Andy
+KB1OIQ
+
+15-feb-2016
+
+
+
+
+  
+
+  
+
+

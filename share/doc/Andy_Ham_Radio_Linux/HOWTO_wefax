@@ -1,0 +1,49 @@
+
+HOWTO receive WEFAX transmissions
+=================================
+
+1) Setup gqrx to receive the WEFAX transmission.  The transmission is a USB
+   transmission requiring a filter width of 5 kHz.  The red line in grqx should
+   be at the left edge of the WEFAX signal, which looks like a rectangle in the
+   waterfall.  The filter should cover the entire signal.  The frequency in gqrx
+   should be set 1.9 kHz lower than the carrier frequency.
+
+2) Start the flgidi program and select "Op Mode" "WEFAX".
+
+3) In fldigi, go to the Configure -> Modems -> Wfx menu
+
+4) Setup the fax images destination directory.  I also prefer the 
+   "Embedded Wefax Gui" option.
+
+5) Start the pavucontrol program (Menu -> Utilities -> Sound -> PAvucontrol).
+
+6) Configure the audio such that the gqrx output is sent to the fldigi input.
+   (This can be somewhat involved, and is described in another document).
+
+7) With the volume controls set properly, there will be signals displayed in the
+   fldigi waterfall.  When receiving the WEFAX transmission, there will be two
+   stripes shown in the fldigi waterfall.  fldigi will automatically adjust itself
+   to align its tuning with these waterfall stripes.
+
+8) I have found the following fldigi settings helpful:
+   * FIR narrow
+   * Click "Non stop" to start decoding anytime during the transmission
+   * if the alignment of the image is incorrect, adjust it but be careful, since
+     I have occasionally crashed fldigi in so doing
+   * to compensate for the sound card clock, one may need to set a value
+     in the "align" adjustment
+
+9) One should see a black and white image appear in fldigi.  When the image
+   transmission is complete, fldigi will save the image in the directory
+   configured in an earlier step.
+
+10) One could similarly decode other transmissions with gqrx and fldigi coupled
+    together in this manner.  I have successfully decoded CW and RTTY.
+    Experiment!
+
+Have a lot of fun, and 73,
+
+Andy
+KB1OIQ
+15-feb-2016
+

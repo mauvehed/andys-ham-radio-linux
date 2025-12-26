@@ -1,0 +1,43 @@
+/* $Id$ */
+
+cli.h
+Command-line handling.
+
+cmds.h
+Commands (check, get, put etc.).
+
+comm.h
+Serial communication.
+
+csv.h
+CSV file handling.
+
+file.h
+Object-oriented representation of c-style FILE.
+
+impexp.h
+Import and export prototypes.
+
+import.cc
+Functions related to importing.
+
+export.cc
+Functions related to exporting.
+
+intl.h
+i18n placeholder.
+
+owxendian.h
+Portable endianness detection.
+
+throw.h
+Exception throwing function, used in every other file.
+
+util.h
+Various helper functions.
+
+version.h
+owx version name.
+
+wouxun.h
+Wouxun radio communication.

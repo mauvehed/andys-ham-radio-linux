@@ -1,0 +1,157 @@
+
+If this file looks improperly spaced, choose a fixed width font.
+
+As of version 26, the source tar files can be found in /usr/local/tarballs.
+
+It is my preference to get files from a repository, as that makes it
+easier for everybody.  However, many things are not available from 
+a repository.  Often, the repository verion is quite old.
+
+
+aa-analyzer				http://sourceforge.net/projects/aa-analyzer/
+
+AIS-catcher				https://github.com/jvde-github/AIS-catcher
+
+antscope2				https://rigexpert.com/files/software/Antscope/antscope2forlinux/
+
+ardop					https://github.com/pflarue/ardop/releases/tag/1.0.4.1.3
+
+chirp					https://trac.chirp.danplanet.com/chirp_next/next-20230404/
+
+Coil64					https://github.com/radioacoustick/Coil64
+
+cqrlog					http://www.cqrlog.com/
+
+cty.dat					http://www.country-files.com/
+
+cwwav					https://github.com/oyvholm/cwwav
+
+direwolf				https://github.com/wb2osz/direwolf
+
+Dream					https://sourceforge.net/projects/drm/
+
+droidstar				https://github.com/nostar/DroidStar
+
+dump1090-mutability			https://github.com/adsbxchange/dump1090-mutability
+
+ESPHamClock				https://www.clearskyinstitute.com/ham/HamClock/
+
+fl_moxgen				http://sourceforge.net/projects/flmoxgen/
+
+flaa					http://www.w1hkj.com/files/flaa/
+
+flcluster				https://sourceforge.net/projects/fldigi/files/flcluster
+
+fldigi					https://sourceforge.net/projects/fldigi/files/fldigi
+
+fllog					https://sourceforge.net/projects/fldigi/files/fllog
+
+flmsg					https://sourceforge.net/projects/fldigi/files/flmsg
+
+flnet					https://sourceforge.net/projects/fldigi/files/flnet
+
+flrig					https://sourceforge.net/projects/fldigi/files/flrig
+
+flwkey					https://sourceforge.net/projects/fldigi/files/flwkey
+
+flwrap					https://sourceforge.net/projects/fldigi/files/flwrap
+
+foxtelem				http://amsat.us/FoxTelem/linux/
+
+freedv					https://freedv.org/
+
+glfer					https://www.qsl.net/in3otd/glfer.html
+
+GridTracker				https://gridtracker.org/
+
+gsmc					https://pkgs.org/download/gsmc
+
+gspiceui				https://sourceforge.net/projects/gspiceui/
+
+hamlib					https://sourceforge.net/projects/hamlib/files/hamlib
+
+ibp					http://www.pa3fwm.nl/software/ibp/
+
+js8spotter				https://kf7mix.com/js8spotter.html
+
+KLog					https://github.com/ea4k/klog/releases
+
+linpac					https://sourceforge.net/projects/linpac/files/
+
+linrad					https://sourceforge.net/projects/linrad/
+
+Morse Runner				https://github.com/w7sst/MorseRunner/releases/tag/v1.84
+
+mvoice					https://github.com/n7tae/mvoice
+
+mfc_gpl					https://sourceforge.net/projects/kb1oiqmicrofoxconfiggpl
+
+M17Client				https://github.com/g4klx/M17Client/
+
+MSHV					http://lz2hv.org/node/10
+
+mvoice					https://github.com/n7tae/mvoice
+
+nanoVNA-saver				https://github.com/NanoVNA-Saver/nanovna-saver/releases
+
+noaa-apt				https://noaa-apt.mbernardi.com.ar/
+
+not1mm					https://pypi.org/project/not1mm/
+
+owx					http://owx.chmurka.net/?p=download
+
+qgrid					https://www.qsl.net/on4qz/qgrid/index.html
+
+qlog					https://github.com/foldynl/QLog
+
+qrq					http://fkurz.net/ham/qrq.html
+
+qsstv					http://users.telenet.be/on4qz/qsstv/downloads/
+					https://github.com/KD9QZO/qsstv
+
+quisk					https://pypi.org/project/quisk/#files
+
+qttinysa				https://github.com/g4ixt/QtTinySA/
+
+SatDump					https://github.com/SatDump/SatDump
+
+SDR++					https://github.com/AlexandreRouma/SDRPlusPlus
+
+svxlink					https://www.svxlink.org/
+					https://github.com/sm0svx/svxlink/releases
+
+tt3_gpl					https://sourceforge.net/projects/kb1oiqtinytrak3configgpl
+
+tqsl					http://arrl.org/tqsl-download
+
+Virtual Radar Server			https://www.virtualradarserver.co.uk/
+
+wordsworth				https://sourceforge.net/projects/kb1oiq-k1ig-wordsworth
+
+wfview					https://gitlab.com/eliggett/wfview
+
+wsjt-x					https://sourceforge.net/projects/wsjt/files/
+
+wsjt-x-improved				https://sourceforge.net/projects/wsjt-x-improved/
+
+wxWidgets				https://github.com/wxWidgets/wxWidgets/tree/v3.1.2
+
+xastir					https://github.com/Xastir/Xastir
+
+xcwcp (unixcw)				https://sourceforge.net/projects/unixcw
+
+xdx					https://sourceforge.net/projects/xdxclusterclient/
+
+xlog					http://download.savannah.nongnu.org/releases/xlog/
+
+xnec2c					https://www.xnec2c.org/
+					https://www.xnec2c.org/releases/
+
+xwefax					https://www.qsl.net/5b4az/
+
+xwxapt					https://www.qsl.net/5b4az/pkg/apt/xwxapt/x
+
+YAAC					https://www.ka2ddo.org/ka2ddo/YAAC.html
+
+
+AMS 07-Nov-2025

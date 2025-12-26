@@ -1,0 +1,35 @@
+/* $Id$ */
+
+Wouxun protocol information.
+
+File written by SP5GOF using information reverse-engineered by SQ5LWN.
+
+Communication parameters are 9600 8n1, with flow control disabled.
+
+After you connect, you must send: "HiWOUXUN" (without quotes and null) 
+and 0x02. Radio will acknowledge by sending back: 0x06. After that you 
+send 0x02, radio acknowledges with 0x06 and sends back it's ID string 
+(6 bytes, "KG669V") and 0xF8. We're not sure what 0xF8 means - maybe 
+some kind of software revision or similar?
+
+After this handshake you can download (read) and upload (write) memory 
+pages by sending 4-byte commands:
+
+1 byte: command
+2 bytes: address (little endian)
+1 byte: size
+
+For reading, use command 'R' and size 0x40. For writing, use command 'W' 
+and size 0x10. After write command send 16 (0x10) bytes in raw binary.
+
+After you send write command, radio will acknowledge it with ACK byte 
+(0x06).
+
+After you send read command, radio will acknowledge it by re-sending your 
+command string back to you with command reversed, so 'R' becomes 'W'. 
+After this 64 (0x40) bytes of raw binary data will follow. After receiving 
+you must send ACK (0x06) byte and radio will reply with 0x06 byte.
+
+Wouxun memory map can be found on SQ5LWN page:
+http://www.baseciq.org/tools/wouxunmemmap
+

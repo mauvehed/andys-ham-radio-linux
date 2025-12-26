@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This is a work in progress.  AMS 24-oct-2025
+# It is intended for use by the AHRL author.
+# It doesn't identify EVERY error...yet(?).
+
+grep -i "Unable to locate package" out.txt
+grep -i "install_ahrl" out.txt
+grep -i cannot out.txt
+grep -i "not found" out.txt
+grep -i "dpkg: error" out.txt
+grep -i "AHRL: ERROR" out.txt
+grep -i "no installation candidate" out.txt
+grep -i fatal: out.txt | grep -v "not a git repository"
+
+

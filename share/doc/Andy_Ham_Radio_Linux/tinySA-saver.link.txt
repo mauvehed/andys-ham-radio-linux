@@ -1,0 +1,15 @@
+git clone https://github.com/erikkaashoek/tinysa-saver
+
+To create the /usr/local/src/tinySA_pve, follow the instructions
+in the HOW_Andy_Setup_nanoVNA-saver.pdf file, but use the command above
+to get the tinySA-saver software from github.
+
+The user shouldn't need to recreate the python virtual environment.
+One exists in /usr/local/src.
+
+When plugged in and turned on, the tinySA should appear as /dev/ttyACM0.
+The user needs to be the dialout group.
+
+KB1OIQ
+15-aug-2020
+

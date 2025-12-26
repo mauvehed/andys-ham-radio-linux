@@ -1,0 +1,6 @@
+#!/bin/bash
+
+/usr/bin/AIS-catcher -N 8100 &
+firefox http://localhost:8100
+killall -9 AIS-catcher
+

@@ -1,0 +1,315 @@
+/* $Id$ */
+
+1. About this program
+2. Authors, webpage, credits, license
+3. Interface
+4. Compilation and installation
+5. Usage
+5.1. owx-check
+5.2. owx-get
+5.3. owx-put
+5.4. owx-export
+5.5. owx-import
+6. Spreadsheet format
+6.1. Channel table
+6.1.1. CH
+6.1.2. Name
+6.1.3. RX & TX Frequency
+6.1.4. RX & TX CTCSS
+6.1.5. Deviation
+6.1.6. TX Power
+6.1.7. Scan
+6.1.8. BCL
+6.2. Frequency ranges
+6.3. FM radio
+6.4. UVD3 welcome message
+
+1. About this program
+
+OWX (Open Wouxun) is an open-source program designed to program Wouxun 
+transceivers. It was developed on Wouxun KG-UV2D and tested on KG-UVD1P 
+(both identify as KG669V). Support was added also for KG-UVA1 radio. 
+Possibly other Wouxuns are supported too, but this is not guaranteed, 
+so use at your own risk and ALWAYS make backups! This software is highly 
+experimental. Using it can result in rendering your radio unusable and 
+your dog killed. You have been warned.
+
+Utility was developed on GNU/Linux with gcc 4.3.2, but ports to other 
+systems can (and should!) be made. It was tested only on i386, but is 
+written with endianness in mind and should run on BE machines as well 
+(but it was never tested and some bugs are possible).
+
+It communicates only in english, but is prepared to handle i18n if someone 
+wants to. Please see intl.h file for details.
+
+Utility has five functions. They are used to:
+
+- check radio connection
+- download binary data from radio
+- upload binary data to radio
+- export human-readable spreadsheet from binary data file
+- import edited spreadsheet into existing binary data file
+
+Binary data contains everything that can be changed in the radio - all 
+settings, channels, current modes of operation etc.
+
+Please also see the TODO file to see what this software can NOT do!
+
+2. Authors, webpage, credits, license
+
+Program was written by SP5GOF (Adam Wysocki, gof (at) chmurka.net). 
+Newest version can be downloaded from http://owx.chmurka.net/
+
+Reverse-engineering, protocol information and initial testing were done 
+by SQ5LWN (Lukasz Mozer, baseciq (at) baseciq.org).
+
+Program is licensed under beer-ware license. We're HAMs and not lawyers, 
+so no law hell applies here (nobody really reads licenses anyways), just 
+pure HAM spirit. You are free to do with this program whatever you like, 
+just be nice and don't remove the original authorship - that would be a 
+bit shitty. If you feel that this code is worth this, you can just shout 
+us some beer or donate some doges to this DogeCoin address: 
+D8bVcncife3w1LAvurTdYknnmNBzkWuQwk
+
+If you don't like the beer-ware license, like, if you prefer fruity 
+drinks or something, you can use the Apache 2.0 license instead.
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Regardless of this, one thing must be said: we cannot be made responsible 
+for breaking your radio with this program. Everything you do, you do at 
+your own risk and by using this program you agree not to fill any lawsuit 
+against us if your rig explodes right in front of your face.
+
+3. Interface
+
+To connect your rig to the PC, you will need any standard RS232/TTL 
+converter with MAX232 or similar. Schematics etc. can be found on 
+Google. You can also adapt some old cellular phone cable or buy a 
+dedicated cable on your favourite bidding service.
+
+Connections:
+
+2.5mm (speaker):
+
+- shield: gnd
+- ring: radio tx (out)
+- tip: not connected
+
+3.5mm (microphone):
+
+- shield: radio rx (in)
+- ring: not connected
+- tip: not connected
+
+4. Compilation and installation
+
+Standard GNU make command will do the stuff. Program was written in C++ 
+with heavy usage of STL, so you will need g++ with standard libraries, 
+and of course GNU make. After compilation use "make install" to install 
+the program in /usr/local/.
+
+5. Usage
+
+Before you begin, it may be convenient to set OWX_PORT environmental 
+variable in ~/.bashrc or similar shell rc file. With this variable 
+you can specify default port instead of using -p. You can also set 
+OWX_TIMEOUT to use alternate default when -t is not specified.
+
+After installation you will find five programs in /usr/local/bin:
+
+owx-check
+owx-get
+owx-put
+owx-export
+owx-import
+
+They are all symlinks to one executable - /usr/local/libexec/owx.
+
+All programs return 0 when everything goes okay and 1 when error occurs.
+
+Programs accept these common options:
+
+-c <cmd>: override command (check, get, put, export, import)
+-h: fast help
+-v: version string
+
+You will almost never use -c command - if it's used, you can use one 
+command (owx-get) to perform another task. It is mandatory only when 
+you run main binary and not the symlinks.
+
+Programs that communicate with the radio (owx-check, owx-get and owx-put) 
+accept these options:
+
+-f: force even if radio is not recognized
+-p <port>: specify port
+-t <timeout>: receive timeout in seconds
+-m <model>: model
+
+-f can force the operation if your radio identifies different from KG669V. 
+Use this option with extreme caution - it is very possible that your radio 
+will be rendered unusable after you use this. It was NEVER tested with any 
+radio different from mentoined above.
+
+-p specifies path to the tty device, i.e. /dev/ttyS0 or /dev/ttyUSB0. Of 
+course you must have appropriate read and write permissions for this device.
+
+-t specifies receive timeout for communication with radio. If you disable 
+it (by setting to 0) and the communication fails, the program will hang 
+forever. You probably don't need to change the default value (5 seconds).
+
+Model for -m can be:
+
+- UVD1 (for UVD1 and UVD2 radios)
+- UVD3 (as UVD1, but with UVD3 welcome message editing)
+- UVA1 (16-channel radio with different location of frequency ranges)
+
+5.1. owx-check
+
+This program just checks for the connection and identification string. It 
+can be used to check that your cable and port works.
+
+5.2. owx-get
+
+This program downloads memory map from radio to binary file.
+
+Options:
+
+-o <path>: binary file to write to
+
+5.3. owx-put
+
+This program uploads memory map from binary file to radio.
+
+Options:
+
+-i <path>: binary file to read from
+-r <path>: reference file
+
+Option -r is not mandatory, but recommended. You can specify original, 
+unchanged file (exactly as downloaded using owx-get) and this will speed 
+up memory uploading, as owx will compare input file to this reference 
+file and upload only changed memory pages. When using this option, be 
+sure that nothing has changed in the radio (even the currently selected 
+memory channel) between downloading reference file and using it for 
+upload. This is important as some variables that cross the page 
+boundaries (if there are any in the memory map) could be corrupted 
+by this.
+
+Example:
+
+owx-get -o file.bin
+cp file.bin backup.bin
+owx-export -i file.bin -o wouxun.csv
+oocalc wouxun.csv
+owx-import -i wouxun.csv -o file.bin
+owx-put -i file.bin -r backup.bin
+
+Please do yourself a favour and double-check that you upload the correct 
+file. If you try to upload incorrect or corrupted file, your radio will 
+power down and fail to power up. owx will refuse to upload any file with 
+incorrect size, but this is the only safety check.
+
+5.4. owx-export
+
+This program exports channel data from binary file to CSV file. This file 
+can be later edited using your favourite spreadsheet editor or even text 
+editor.
+
+Options:
+
+-i <path>: binary file to read from
+-o <path>: csv file to write to
+
+5.5. owx-import
+
+This program reads the specified, possibly edited by you CSV file, and 
+patches existing binary file with this updated data. The file is now 
+prepared to be uploaded with owx-put.
+
+Options:
+
+-i <path>: csv file to read from
+-o <path>: binary file to write to (must already exist)
+
+6. Spreadsheet format
+
+When importing to a spreadsheet editor, import all fields as text (to 
+make sure that your editor will not try to interpret anything). Then 
+you will see the channel table and below it, frequency ranges.
+
+6.1. Channel table
+
+Channel table fields are as follows:
+
+6.1.1. CH
+
+This is the channel number. Do not change.
+
+6.1.2. Name
+
+Channel name. Max 6 characters, only letters and digits. Lowercase letters 
+will be converted to uppercase.
+
+6.1.3. RX & TX Frequency
+
+Frequencies in format XXX.YYYYY (for example "145.52500"). They must strictly 
+follow this format (another reason to import fields as text).
+
+6.1.4. RX & TX CTCSS
+
+PL subtone. Format is XX.Y or XXX.Y (for example: "127.3").
+
+6.1.5. Deviation
+
+Can be "narrow" or "wide", for narrow-band FM and wide-band FM.
+
+6.1.6. TX Power
+
+Can be "low" for 1W and "high" for 5W (on VHF) or 4W (on UHF).
+
+6.1.7. Scan
+
+Can be "yes" to include this channel in scanning and "no" to skip.
+
+6.1.8. BCL
+
+Can be "yes" to enable BCL (Busy Channel Lockout) on this channel and "no" 
+otherwise. BCL prevents you from TX-ing when the channel is busy (squelch 
+opened).
+
+6.2. Frequency ranges
+
+There are eight values below the channel table. They correspond to the RX 
+and TX ranges on both bands. By editing them, you can unlock your radio 
+(change it's transmit and receive range), but it's easy to kill your radio 
+by setting invalid values. If the ranges are invalid, the rig will refuse 
+to turn on, probably due to busy-waiting for the PLL loop to lock. YOU WILL 
+NOT BE ABLE TO REPROGRAM MEMORY USING ORDINARY CABLE. We've killed one radio 
+this way and in order to bring it back to life I had to open it, disable the 
+MCU (I just disabled it's clock), connect to the memory I2C bus and manually 
+reprogram it. If you lack appropriate equipment or skills you definitely 
+don't want to do this.
+
+OWX performs some basic checks on the ranges when importing and warns you 
+if any value seems to be bogus, but it doesn't check the ranges (if you mess 
+with their order). Also, bugs in the importing routine are possible. If you 
+see any warning during importing, consider contacting me before putting the 
+resulting file to the radio, as it is easy to brick the radio and not so 
+easy to bring it back to life.
+
+If instead of frequencies you see some hexadecimal values (0xABCD or so) 
+then the decoder (used when exporting) found unexpected pattern and refused 
+to decode the value. Please contact me and provide these raw values. It 
+should be safe to program them back to the radio, but don't change them 
+(they're encoded).
+
+6.3. FM radio
+
+Below frequency ranges there are nine FM broadcast radio channels. You can 
+use syntax XX.Y or XXX.Y (example: "101.5") to program broadcast FM radio.
+
+6.4. UVD3 welcome message
+
+KG-UVD3 allows you to edit welcome message - max 6 ascii characters. In UVD1 
+and UVD2 this memory area is ignored.

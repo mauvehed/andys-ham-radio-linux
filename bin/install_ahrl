@@ -1,0 +1,3689 @@
+#!/bin/bash
+
+################################################################################
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <https://www.gnu.org/licenses/>.
+################################################################################
+
+
+################################################################################
+# Script for installing "Andy's Ham Radio Linux" (AHRL).
+# Copyright 2024, Andy Stewart (KB1OIQ)
+# Copyright 2025, Andy Stewart (KB1OIQ)
+#
+# Prior to AHRL version 26, all versions were Xubuntu remastered.
+# With this installation script, more flavors of Linux will be able to
+# use these ham radio programs and menu customizations.  See
+# /usr/local/share/doc/Andy_Ham_Radio_Linux/GETTING_STARTED for a list
+# of tested configurations.
+################################################################################
+
+VERSION="v26e"
+RELEASE_DATE="November 2025"
+
+################################################################################
+# If you change these:
+#   - many of the AHRL menus will fail to work
+#   - the programs compiled/installed from source code likely won't work
+################################################################################
+
+BIN_DIR=/usr/local/bin
+SRC_DIR=/usr/local/src
+MAN_DIR=/usr/share/man
+MAN1_DIR=$MAN_DIR/man1
+
+TARBALL_DIR=/usr/local/tarballs
+LOCAL_SHARE_DIR=/usr/local/share
+DELETE_DIR=delete_me
+
+APT_AUTOREMOVE="apt autoremove -y"
+APT_CACHE="apt-cache"
+APT_INSTALL="apt install -y"
+APT_PURGE="apt purge -y"
+APT_UPDATE="apt update"
+APT_UPGRADE="apt upgrade -y"
+
+DPKG_INSTALL="dpkg -i"
+
+################################################################################
+# A browser is required to display the documentation and related directories.
+# A PDF viewer is required to display some documentation.
+#
+# Use Firefox, but it needs a quick modification to allow it to display local files:
+#    - about:config
+#    - set security.fileuri.strict_origin_policy to FALSE
+#    - restart firefox
+
+# This browser is hardcoded into several menus which bring up helpful websites.
+# Perhaps I should consider creating those files on the fly with this browser value.
+################################################################################
+
+BROWSER=firefox
+
+PDF_VIEWER=atril
+
+################################################################################
+# Number of CPUs available - used for make -j
+# Increase this number if you have more CPUs available.
+# It will make the source code compile faster.
+#
+# Recommended settings which SHOULD work:
+#   2GB memory -> NUM_CPUS=1 (not enough memory to push it harder)
+#   4GB memory -> NUM_CPUS=2
+#   8GB memory -> NUM_CPUS=4
+#   more than 8GB of memory -> NUM_CPUS=`nproc` (go for it!)
+################################################################################
+
+NUM_CPUS=1
+
+# Some systems have a different version of libwxgtk*-dev
+LIBWXGTK_DEV=`$APT_CACHE search libwxgtk | grep dev | grep -v media | grep -v webview | awk '{print $1}'`
+
+################################################################################
+# These can be changed by the user as desired.  These enable (1) or disable (0)
+# the installation of the respective programs.
+################################################################################
+
+INSTALL_AA_ANALYZER=1
+INSTALL_AHRL_DOCS=1
+INSTALL_AHRL_MENUS=1
+INSTALL_AHRL_VERSION=1
+INSTALL_AIS_CATCHER=1
+INSTALL_ANTSCOPE2=1
+INSTALL_ARDOP=1
+INSTALL_ARDUINO=1
+INSTALL_ATLC=1
+INSTALL_BACKDROPS=1
+INSTALL_BROWSER=1
+INSTALL_CHIRP=1
+INSTALL_COIL64=1
+INSTALL_COUNTRY_FILES=1
+INSTALL_CQRLOG=1
+INSTALL_CWWAV=1
+INSTALL_DIREWOLF=1
+INSTALL_DREAM=1
+INSTALL_DUMP1090_MUTABILITY=1
+INSTALL_EBOOK2CWGUI=1
+INSTALL_ESP_HAMCLOCK=1
+INSTALL_FLAA=1
+INSTALL_FLAMP=1
+INSTALL_FLCLUSTER=1
+INSTALL_FLDIGI=1
+INSTALL_FLLOG=1
+INSTALL_FLMOXGEN=1
+INSTALL_FLMSG=1
+INSTALL_FLNET=1
+INSTALL_FLRIG=1
+INSTALL_FLWKEY=1
+INSTALL_FLWRAP=1
+INSTALL_FOXTELEM=1
+INSTALL_FREEDV=1
+INSTALL_FRITZING=1
+INSTALL_GLFER=1
+INSTALL_GNURADIO=1
+INSTALL_GPREDICT=1
+INSTALL_GPSMAN=1
+INSTALL_GQRX=1
+INSTALL_GRIDTRACKER=1
+INSTALL_GRIG=1
+INSTALL_GSMC=1
+INSTALL_GSPICEUI=1
+INSTALL_IBP=1
+INSTALL_JS8CALL=1
+INSTALL_JS8SPOTTER=1
+INSTALL_JTDX=1
+INSTALL_KICAD=1
+INSTALL_KLOG=1
+INSTALL_LIBHAMLIB4=1
+INSTALL_LINPAC=1
+INSTALL_LINRAD=1
+INSTALL_MFC_GPL=0 # BOZO
+INSTALL_MORSE_RUNNER=1
+INSTALL_MSHV=1
+INSTALL_MVOICE=1
+INSTALL_NANOVNA_SAVER=0 # Code base is horribly broken at 0.7.3:  https://github.com/NanoVNA-Saver/nanovna-saver/issues/808
+INSTALL_NGSPICE=1
+INSTALL_NOAA_APT=0  # All NOAA satellites are out of service.  09-Nov-2025
+INSTALL_NOT1MM=1
+INSTALL_NOTEPADQQ=1
+INSTALL_OPEN_WOUXON=1
+INSTALL_PIPX=1
+INSTALL_PUTTY=1
+INSTALL_PYAUTOGUI=1 # used by the AHRL developer to test menus
+INSTALL_QGRID=1
+INSTALL_QLOG=1
+INSTALL_QRQ=1
+INSTALL_QSSTV=1
+INSTALL_QTEL=1
+INSTALL_QTTINYSA=1
+INSTALL_QUISK=1
+INSTALL_RF_EXPOSURE_CALC=1
+INSTALL_RTL_SDR_V4_DRIVER=1
+INSTALL_SATDUMP=1
+INSTALL_SDR_PLUS_PLUS=1
+INSTALL_SOLAR_DATA=1
+INSTALL_SOURCE_LIBS=1
+INSTALL_SPLAT=1
+INSTALL_SUNCLOCK=1
+INSTALL_SVXLINK=1
+INSTALL_SYLPHEED=1
+INSTALL_SVXREFLECTOR=1
+INSTALL_TQSL=1
+INSTALL_TT3_GPL=0 # BOZO
+INSTALL_VIRTUAL_RADAR_SERVER=1
+INSTALL_WINE=1 # Wine is needed
+INSTALL_WFVIEW=1
+INSTALL_WORDSWORTH=1
+INSTALL_WSJTX=1
+INSTALL_WSJTX_IMPROVED=1
+INSTALL_WWL=1
+INSTALL_XASTIR=1
+INSTALL_XCWCP=1
+INSTALL_XDX=1
+INSTALL_XLOG=1
+INSTALL_XNEC2C=1
+INSTALL_XOSVIEW=1
+INSTALL_XWEFAX=1
+INSTALL_XWXAPT=0  # All NOAA satellites are out of service.  09-Nov-2025
+INSTALL_YAAC=1
+
+################################################################################
+# Function: check_apt
+################################################################################
+
+check_apt() {
+
+	if [ ! -x /usr/bin/apt ]; then
+		echo "AHRL: APT is needed to install software - not found - exiting."
+		exit
+	fi
+}
+
+#################################################################################
+# Function: check_arch
+#################################################################################
+
+check_arch() {
+	if [ "$(arch)" = "aarch64" ]; then
+		echo "AHRL: Architecture aarch64 detected - OK."
+	elif [ "$(arch)" = "x86_64" ]; then
+		echo "AHRL: Architecture x86_64 detected - OK."
+	else
+		echo "AHRL: unsupported architecture detected - exiting."
+		exit
+	fi
+}
+
+#################################################################################
+# Function: check_memory
+#################################################################################
+
+check_memory() {
+	AVAIL_MEM=`free --giga | grep Mem | awk '{print $2}'`
+	if (( $AVAIL_MEM < 2 )); then
+		echo "AHRL: Less than 2GB of memory detected - this is insufficient - exiting."
+		exit
+	elif (( $AVAIL_MEM < 4 )); then
+		echo "AHRL: Less than 4 GB of memory available - it'll work but it may be slow - continuing."
+	else
+		echo "AHRL: $AVAIL_MEM GB of memory available - that should be OK - continuing."
+	fi
+}
+
+################################################################################
+# Function: check_root
+################################################################################
+
+check_root() {
+
+	if [ "$USER" != "root" ]; then
+		echo "AHRL: this script MUST be run by root - exiting."
+		exit
+	fi
+}
+
+#################################################################################
+# Function: check_storage
+#################################################################################
+
+check_storage() {
+	AVAIL_STORAGE=`df -B 1048576 / | grep -v Avail | awk '{print $4}'` 
+	NEEDED_STORAGE=10000 # roughly 10GB
+
+	echo "AHRL: Available storage: $AVAIL_STORAGE"
+	echo "AHRL: Needed storage: $NEEDED_STORAGE"
+
+	if (( $AVAIL_STORAGE < $NEEDED_STORAGE )); then
+		echo "AHRL: There is insufficient storage available to install AHRL - exiting."
+		exit
+	else
+		echo "AHRL: There appears to be sufficient storage available - continuing."
+	fi
+}
+
+#################################################################################
+# Function: check_network
+#################################################################################
+
+check_network() {
+	NSLOOKUP=`which nslookup`
+	if [ "$NSLOOKUP" = "" ]; then
+		$APT_INSTALL bind9-dnsutils
+		NSLOOKUP=`which nslookup`
+		if [ "$NSLOOKUP" = "" ]; then
+			echo "AHRL: The network state has not been determined - exiting."
+			exit
+		fi
+	fi
+
+	$NSLOOKUP www.google.com > /dev/null
+	if [ "$?" -eq "1" ]; then
+		echo "AHRL: The network is DOWN and the installation cannot proceed - exiting."
+		exit
+	else
+		echo "AHRL: The network is UP and running - continuing."
+	fi
+}
+
+#################################################################################
+# Function: cleanup_deleted_files
+#################################################################################
+
+cleanup_deleted_files() {
+	echo "AHRL: cleaning up directory: $SRC_DIR/$DELETE_DIR"
+
+	if [ -d "$SRC_DIR/$DELETE_DIR" ]; then
+		rm -fr $SRC_DIR/$DELETE_DIR
+	fi
+
+	echo "AHRL: cleaning up directory: $SRC_DIR/$DELETE_DIR - DONE"
+}
+
+#################################################################################
+# Function: cleanup_unneeded_software
+#################################################################################
+
+cleanup_unneeded_software() {
+	echo "AHRL: Cleanup unneeded software"
+
+	$APT_AUTOREMOVE
+
+	echo "AHRL: Cleanup unneeded software - DONE"
+}
+
+#################################################################################
+# Function: get_username
+#################################################################################
+
+get_username() {
+	echo "AHRL: get_username"
+	echo ""
+	echo "What is the username of the default user?"
+	read USERNAME
+	if [ "$USERNAME" = "" ]; then
+		echo "AHRL: you MUST enter the username of the default user - exiting."
+		exit
+	fi
+
+	adduser --quiet --home /home/$USERNAME --shell /bin/bash --gecos "" $USERNAME
+
+	adduser $USERNAME adm
+	adduser $USERNAME sudo
+	adduser $USERNAME lpadmin
+	adduser $USERNAME dip
+	adduser $USERNAME plugdev
+	adduser $USERNAME netdev
+	adduser $USERNAME cdrom
+	adduser $USERNAME dialout
+	adduser $USERNAME xastir-ax25
+	adduser $USERNAME svxlink
+
+	echo "AHRL: get_username - DONE"
+}
+
+#################################################################################
+# Function: package_exists(name_of_package)
+#           return status 1 = package exists
+#           return status 0 = package does NOT exist
+#################################################################################
+
+package_exists() {
+	$APT_CACHE pkgnames | grep -q "^$1$" &> /dev/null
+	if [ $? = 0 ]; then
+		echo "AHRL: Debug: package_exists($1) = 1"
+		return 1
+	else
+		echo "AHRL: Debug: package_exists($1) = 0"
+		return 0
+	fi
+}
+
+#################################################################################
+# Function: package_name(env variable name, pkg1, pkg2)
+#           return the name of the existing package: pkg1 or pkg2
+#           If pkg1 exists, pkg2 is not checked.
+#################################################################################
+
+package_name() {
+	echo "AHRL: Debug: package_name($1, $2, $3)"
+
+	CMD="package_exists $2"
+	$CMD
+	STATUS1=$?
+	#echo "AHRL: Debug: STATUS1 = $STATUS1"
+
+	CMD="package_exists $3"
+	$CMD
+	STATUS2=$?
+	#echo "AHRL: Debug: STATUS2 = $STATUS2"
+
+	if [ $STATUS1 -eq 1 ]; then
+		eval "$1=$2"
+		echo "AHRL: Debug: $1=$2"
+	elif [ $STATUS2 -eq 1 ] ; then
+		eval "$1=$3"
+		echo "AHRL: Debug: $1=$3"
+	else
+		eval "$1="
+		echo "AHRL: ERROR: no suitable package for $1 exists"
+	fi
+}
+
+#################################################################################
+# Function: print_post_installation_suggestions
+#################################################################################
+
+print_post_installation_suggestions() {
+	echo "#################################################################################"
+	echo ""
+	echo "AHRL: Post Installation Suggestions"
+	echo ""
+	echo "#################################################################################"
+	echo ""
+
+	# Notification about lack of window decorations on WSJT-X (only applies to Raspberry Pi)
+	if [ "$(arch)" = "aarch64" ]; then
+		echo "#################################################################################"
+		echo ""
+		echo "AHRL: If you are running on a Raspberry Pi, you may encounter this issue:"
+		echo ""
+		echo "AHRL: WSJT-X will not display its boarder and decorations when running Wayland."
+		echo "AHRL:   - One solution is to switch from Wayland to X11.  That is done as follows:"
+		echo "AHRL:   - sudo raspi-config"
+		echo "AHRL:   - Choose menu option 6: advanced options"
+		echo "AHRL:   - Then choose menu option A6: wayland"
+		echo "AHRL:   - Finally, choose menu option W1: Openbox with X11 backend"
+		echo "AHRL:   - Reboot"
+		echo ""
+		echo "#################################################################################"
+		echo ""
+	fi
+
+	# Notification about sound issue and how to workaround it
+	echo "#################################################################################"
+	echo ""
+	echo "AHRL: WORKAROUND: if sound is not working, and all you see is the"
+	echo "AHRL:             dummy output device, run this script EXACTLY once:"
+	echo "AHRL:             /usr/local/bin/fix_sound"
+	echo ""
+	echo "#################################################################################"
+	echo ""
+
+	# Reboot or else!  :-)
+	echo "#################################################################################"
+	echo ""
+	echo "AHRL: It is REQUIRED that you reboot the computer to ensure that"
+	echo "AHRL: all changes take effect (e.g. group settings)."
+	echo ""
+	echo "#################################################################################"
+	echo ""
+}
+
+################################################################################
+# Function: install_aa_analyzer
+################################################################################
+
+install_aa_analyzer() {
+	if [ $INSTALL_AA_ANALYZER -eq 1 ]; then
+		echo "AHRL: Installing aa_analyzer"
+
+		# Install library from CPAN
+		# Accept default answer "yes" regarding autoconfiguration.
+		(export PERL_MM_USE_DEFAULT=1; cpan install Device/SerialPort.pm)
+
+		# Now install aa-analyzer
+		SRC_FILE=aa-analyzer-0.09.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./install_it
+		chmod 755 $BIN_DIR/aa-analyzer.pl
+
+		cp "aa-analyzer.1" $MAN1_DIR
+
+		echo "AHRL: Installing aa_analyzer - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ahrl_docs
+################################################################################
+
+install_ahrl_docs() {
+	if [ $INSTALL_AHRL_DOCS -eq 1 ]; then
+		echo "AHRL: Installing ahrl_docs"
+
+		# Install a PDF viewer
+		$APT_INSTALL $PDF_VIEWER
+
+		# Create PACKAGES file
+		AHRL_DOC_DIR=$LOCAL_SHARE_DIR/doc/Andy_Ham_Radio_Linux
+
+		rm -f $AHRL_DOC_DIR/PACKAGES
+		dpkg-query --list > $AHRL_DOC_DIR/PACKAGES
+
+		# Create VERSIONS file
+		rm -f $AHRL_DOC_DIR/VERSIONS
+
+		# .tar.gz files
+		for i in `ls $TARBALL_DIR/*.tar.gz`; do
+			basename $i .tar.gz >> $AHRL_DOC_DIR/VERSIONS
+		done
+
+		# .tgz files
+		for i in `ls $TARBALL_DIR/*.tgz`; do
+			basename $i .tgz >> $AHRL_DOC_DIR/VERSIONS
+		done
+
+		# .bz2 files
+		for i in `ls $TARBALL_DIR/*.bz2`; do
+			basename $i .tar.bz2 >> $AHRL_DOC_DIR/VERSIONS
+		done
+
+		# .zip files
+		for i in `ls $TARBALL_DIR/*.zip`; do
+			basename $i .zip >> $AHRL_DOC_DIR/VERSIONS
+		done
+
+		echo "AHRL: Installing ahrl_docs - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ahrl_menus
+#           FYI: The command desktop-file-validate checks for correct
+#           *.desktop file construction.
+################################################################################
+
+install_ahrl_menus() {
+	if [ $INSTALL_AHRL_MENUS -eq 1 ]; then
+		echo "AHRL: Installing ahrl_menus"
+
+		cd $LOCAL_SHARE_DIR/desktop-directories
+		./install_it
+
+		# Install menu for js8spotter
+		# That script was created inside of install_js8spotter
+		if [ $INSTALL_JS8SPOTTER -eq 1 ]; then
+			echo "AHRL: Installing js8spotter_menu"
+			pkexec --user $USERNAME $BIN_DIR/install_js8spotter_menu
+			echo "AHRL: Installing js8spotter_menu - DONE"
+		fi
+
+		# Cleanup old menu files from obsolete software
+		old_menus=("arduinoide" "gridtracker" "gwave" "nanoVNA-saver"
+			   "pota_putter" "pylogjam" "sdrangel" "tinySA-saver")
+
+		for i in ${old_menus[@]}; do
+		    echo "AHRL: removing old menu file:  $LOCAL_SHARE_DIR/applications/${i}.desktop"
+			rm -f $LOCAL_SHARE_DIR/applications/${i}.desktop
+		done
+
+		# Cleanup obsolete menu files
+		rm -f $LOCAL_SHARE_DIR/applications/noaa-apt.desktop
+		rm -f $LOCAL_SHARE_DIR/applications/xwxapt.desktop
+
+		# Some programs don't work on Raspberry Pi.  After the menu
+		# installation program runs, delete the desktop file for these
+		# programs.  Deleting these files beforehand breaks the menu
+		# installer.
+		if [ "$(arch)" = "aarch64" ]; then
+			rm -f $LOCAL_SHARE_DIR/applications/antscope2.desktop
+			rm -f $LOCAL_SHARE_DIR/applications/morse_runner.desktop
+			rm -f $LOCAL_SHARE_DIR/applications/not1mm.desktop
+		fi
+
+		echo "AHRL: Installing ahrl_menus - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ahrl_version
+################################################################################
+
+install_ahrl_version() {
+	if [ $INSTALL_AHRL_VERSION -eq 1 ]; then
+		echo "AHRL: Installing ahrl_version"
+
+		SCRIPT=$BIN_DIR/version
+		rm -f $SCRIPT
+
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "echo \" \"" >> $SCRIPT
+		echo "echo \"Andy's Ham Radio Linux, version $VERSION, $RELEASE_DATE\"" >> $SCRIPT
+		echo "echo \" \"" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing ahrl_version - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ais_catcher
+################################################################################
+
+install_ais_catcher() {
+	if [ $INSTALL_AIS_CATCHER -eq 1 ]; then
+		echo "AHRL: Installing ais_catcher"
+
+		$APT_INSTALL curl
+		$APT_INSTALL libsoxr-dev
+		$APT_INSTALL libsamplerate0-dev
+
+		# Install this program from a script supplied by the ais_catcher author
+		bash -c "$(wget -qO- https://raw.githubusercontent.com/jvde-github/AIS-catcher/main/scripts/aiscatcher-install)"
+
+		echo "AHRL: Installing ais_catcher - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_antscope2
+################################################################################
+
+install_antscope2() {
+	if [ $INSTALL_ANTSCOPE2 -eq 1 ]; then
+		echo "AHRL: Installing antscope2"
+
+		if [ "$(arch)" = "aarch64" ]; then
+			echo "AHRL: cannot run antscope2 on Raspberry Pi - sorry."
+		else
+			$DPKG_INSTALL $TARBALL_DIR/antscope2_1.4.5_ubuntu.deb
+
+			if [ ! -d /usr/lib/udev/rules.d ]; then
+				echo "AHRL: ERROR installing udev rules file for antscope2"
+			else
+				cp $TARBALL_DIR/rigexpert-usb.rules /usr/lib/udev/rules.d/
+			fi
+		fi
+
+		echo "AHRL: Installing antscope2 - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ardop
+################################################################################
+
+install_ardop() {
+	if [ $INSTALL_ARDOP -eq 1 ]; then
+		echo "AHRL: Installing ardop"
+
+		$APT_INSTALL libasound2-dev
+
+		SRC_FILE=ardop-1.0.4.1.3.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+
+		make clean
+		make -j $NUM_CPUS
+		cp ardopcf $BIN_DIR
+
+		echo "AHRL: Installing ardop - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_arduino
+################################################################################
+
+install_arduino() {
+	if [ $INSTALL_ARDUINO -eq 1 ]; then
+		echo "AHRL: Installing arduino"
+
+		$APT_INSTALL arduino
+
+		echo "AHRL: Installing arduino - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_atlc
+################################################################################
+
+install_atlc() {
+	if [ $INSTALL_ATLC -eq 1 ]; then
+		echo "AHRL: Installing atlc"
+
+		$APT_INSTALL atlc
+
+		echo "AHRL: Installing atlc - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_backdrops
+################################################################################
+
+install_backdrops() {
+
+	if [ $INSTALL_BACKDROPS -eq 1 ]; then
+		echo "AHRL: Installing backdrops"
+
+		BACKDROPS_DIR=$LOCAL_SHARE_DIR/ahrl/backdrops
+		BACKDROPS_FILE=backdrops.tar.gz
+
+		mkdir -p $BACKDROPS_DIR
+		cd $LOCAL_SHARE_DIR/ahrl
+
+		tar xzvf $TARBALL_DIR/$BACKDROPS_FILE
+		chown -R root:root $BACKDROPS_DIR
+
+		echo "AHRL: Installing backdrops - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_browser
+#
+#   The "snap" version of Firefox has severe limitations (e.g. it won't read local
+#   files like the help documentation).
+#
+#   If the browser is firefox, and if snap has been installed,
+#   remove it and install the version from the Mozilla repository.
+#
+#   Add the Mozilla repository, and install that version of firefox.
+#     https://linuxconfig.org/switching-to-firefoxs-deb-installation-on-ubuntu-22-04-a-guide-to-avoiding-snap-packages
+#
+#   If the browser is NOT firefox, just install the requested browser.
+#
+#   Debian 12.7 has firefox-esr already installed - leave it alone, since it is
+#   not a snap version.
+################################################################################
+
+install_browser() {
+	if [ $INSTALL_BROWSER -eq 1 ]; then
+		echo "AHRL: Installing $BROWSER"
+
+		if [ "$BROWSER" = "firefox" ]; then
+
+			# If snap is NOT installed, the variable will be assigned the value of "none".
+			IS_SNAP_INSTALLED="`$APT_CACHE policy snapd | grep Installed | awk -F\( '{print $2}' | awk -F\) '{print $1}'`"
+
+			if [ "$IS_SNAP_INSTALLED" = "none" ]; then
+				# snap is NOT installed.  Choose between firefox-esr (Debian 12.7) and firefox (Ubuntu).
+
+				# If these are NOT available, the variable will be assigned the value of "none".
+				IS_FIREFOX_AVAILABLE="`$APT_CACHE policy firefox | grep Candidate | awk -F\( '{print $2}' | awk -F\) '{print $1}'`"
+				IS_FIREFOX_ESR_AVAILABLE="`$APT_CACHE policy firefox-esr | grep Candidate | awk -F\( '{print $2}' | awk -F\) '{print $1}'`"
+
+				# Debian 12.7: firefox-esr is available but firefox is not
+				# Ubuntu 24.04: both are available
+				if [ "$IS_FIREFOX_ESR_AVAILABLE" != "none" -a "$IS_FIREFOX_AVAILABLE" = "none" ]; then
+					$APT_INSTALL firefox-esr
+				elif [ "$IS_FIREFOX_AVAILABLE" != "none" ]; then
+					$APT_INSTALL firefox
+				else
+					echo "AHRL: ERROR: no flavor of firefox is available for installation."
+				fi
+			else
+				# snap is installed, remove the firefox version
+				$APT_INSTALL software-properties-common
+				add-apt-repository -y --ppa mozillateam/ppa
+
+				echo '
+Package: *
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001
+
+Package: firefox
+Pin: version 1:1snap1-0ubuntu2
+Pin-Priority: -1
+' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+
+				snap remove firefox
+				$APT_PURGE firefox
+				$APT_UPDATE
+				$APT_INSTALL firefox
+
+				echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
+			fi
+		else
+			# The desired browser is not firefox.  Install the requested browser.
+			$APT_INSTALL $BROWSER
+		fi
+
+		echo "AHRL: Installing $BROWSER - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_chirp
+################################################################################
+
+install_chirp() {
+	if [ $INSTALL_CHIRP -eq 1 ]; then
+		echo "AHRL: Installing chirp"
+
+		# Go to Sourceforge AHRL and note this bug:
+		# https://sourceforge.net/p/kb1oiq-andysham/bugs/9/
+		#
+		# On some systems like vanilla Ubuntu, when one plugs
+		# in a USB thumb drive, the USB icon appears.  When one
+		# clicks on that icon, Chirp(!) runs unexpectedly.
+		#
+		# One can stop this behavior with the following command:
+		#   gsettings set org.gnome.shell.extensions.dash-to-doc show-mounts false
+		#
+		# This will prevent the USB icon from appearing when a thumb drive is plugged in.
+		# Thus, there's nothing to click and Chirp won't run unexpectedly.
+		#
+		# However, one can get at the files on the USB thumb drive by clicking
+		# on the file manager icon.
+		#
+		# One can run chirp in the expected way.
+		#
+		# Admittedly, this is not an ideal solution.
+		#
+
+		$APT_INSTALL python3-wxgtk4.0
+
+		SRC_FILE=chirp-20251108-py3-none-any.whl
+
+		# Create $BIN_DIR/install_chirp
+		SCRIPT=$BIN_DIR/install_chirp
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+		echo "pipx install --force --system-site-packages $TARBALL_DIR/$SRC_FILE" >> $SCRIPT
+		echo "pipx ensurepath" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		pkexec --user $USERNAME $SCRIPT
+
+		# Create a script that will run chirp.
+		RUN_SCRIPT=$BIN_DIR/run_chirp
+
+		rm -f $RUN_SCRIPT
+
+		echo "#!/bin/bash" >> $RUN_SCRIPT
+		echo ""  >> $RUN_SCRIPT
+		echo "cd /home/$USERNAME/.local/bin" >> $RUN_SCRIPT
+		echo "./chirp" >> $RUN_SCRIPT
+
+		chmod 755 $RUN_SCRIPT
+
+		echo "AHRL: Installing chirp - DONE"
+	fi
+}
+
+#################################################################################
+# Function: install_coil64
+#################################################################################
+
+install_coil64() {
+	if [ $INSTALL_COIL64 -eq 1 ]; then
+		echo "AHRL: Installing Coil64"
+
+		SRC_FILE=Coil64-2.3.37.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		qmake Coil64.pro
+		make -j $NUM_CPUS
+
+		cp Coil64 /usr/local/bin
+		chmod 555 /usr/local/bin/Coil64
+
+		echo "AHRL: Installing Coil64 - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_country_files
+################################################################################
+
+install_country_files() {
+	if [ $INSTALL_COUNTRY_FILES -eq 1 ]; then
+		echo "AHRL: Installing country_files"
+
+		SRC_FILE=cty-3536.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $TARBALL_DIR/$SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		mkdir -p $SRC_FILE_DIR
+		cd $SRC_FILE_DIR
+		unzip $TARBALL_DIR/$SRC_FILE
+
+		# There are many consumers of cty.dat
+		mkdir -p /usr/share/hamradio-files
+		cp cty.dat /usr/share/hamradio-files
+
+		mkdir -p /usr/share/jtdx
+		cp cty.dat /usr/share/jtdx
+
+		mkdir -p /usr/share/wsjtx
+		cp cty.dat /usr/share/wsjtx
+
+		mkdir -p /usr/share/xdx
+		cp cty.dat /usr/share/xdx
+
+		mkdir -p /usr/share/xlog
+		cp cty.dat /usr/share/xlog
+
+		mkdir -p /usr/local/share/xlog/dxcc
+		cp cty.dat /usr/local/share/xlog/dxcc
+
+		echo "AHRL: Installing country_files - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_cqrlog
+################################################################################
+
+install_cqrlog() {
+	if [ $INSTALL_CQRLOG -eq 1 ]; then
+		echo "AHRL: Installing cqrlog"
+
+		$APT_INSTALL cqrlog
+
+		echo "AHRL: Installing cqrlog - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_cwwav
+################################################################################
+
+install_cwwav() {
+	if [ $INSTALL_CWWAV -eq 1 ]; then
+		echo "AHRL: Installing cwwav"
+
+		$APT_INSTALL libsndfile1-dev
+
+		SRC_FILE=cwwav-master.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=cwwav-master
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+		make install
+
+		echo "AHRL: Installing cwwav - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_direwolf
+################################################################################
+
+install_direwolf() {
+	if [ $INSTALL_DIREWOLF -eq 1 ]; then
+		echo "AHRL: Installing direwolf"
+
+		SRC_FILE=direwolf-1.8.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake ..
+		make -j $NUM_CPUS
+		make install
+		make install-conf
+		cp ./direwolf.conf /home/$USERNAME/
+
+		echo "AHRL: Installing direwolf - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_dream
+################################################################################
+
+install_dream() {
+	if [ $INSTALL_DREAM -eq 1 ]; then
+		echo "AHRL: Installing dream"
+
+		$APT_INSTALL libqt5webkit5-dev
+		$APT_INSTALL libqwt-qt5-dev
+		$APT_INSTALL libqt5svg5-dev
+		$APT_INSTALL libpulse-dev
+		$APT_INSTALL libfftw3-dev
+
+		ln -s /usr/lib/libqwt-qt5.so.6.1.4 /usr/lib/libqwt.so
+
+		SRC_FILE=dream-2.1.1-svn808.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=dream
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		qmake dream.pro
+
+		# fix src/util/Hamlib.cpp to avoid a compilation error
+		pushd src/util
+		cat Hamlib.cpp | sed -e s/,\ model/,\ \(int\)model/g > Hamlib.cpp.1
+		cat Hamlib.cpp.1 | sed -e s/,\ iHamlibModelID\)\;/,\ \(int\)iHamlibModelID\)\;/g > Hamlib.cpp.2
+		mv Hamlib.cpp Hamlib.cpp.orig
+		cp Hamlib.cpp.2 Hamlib.cpp
+		popd
+
+		# fix src/GUI-QT/DialogUtil.h - conflicting typedef causes a compilation error
+		pushd src/GUI-QT
+		cat DialogUtil.h | sed -e s/typedef\ int/typedef\ uint32_t/g > DialogUtil.h.ahrl
+		mv DialogUtil.h DialogUtil.h.orig
+		cp DialogUtil.h.ahrl DialogUtil.h
+		popd
+
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing dream - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_dump1090_mutability
+################################################################################
+
+install_dump1090_mutability() {
+	if [ $INSTALL_DUMP1090_MUTABILITY -eq 1 ]; then
+		echo "AHRL: Installing dump1090"
+
+		$APT_INSTALL dump1090-mutability
+
+		echo "AHRL: Installing dump1090 - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ebook2cwgui
+################################################################################
+
+install_ebook2cwgui() {
+	if [ $INSTALL_EBOOK2CWGUI -eq 1 ]; then
+		echo "AHRL: Installing ebook2cwgui"
+
+		$APT_INSTALL ebook2cwgui
+
+		echo "AHRL: Installing ebook2cwgui - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_esp_hamclock
+################################################################################
+
+install_esp_hamclock() {
+	if [ $INSTALL_ESP_HAMCLOCK -eq 1 ]; then
+		echo "AHRL: Installing esp_hamclock"
+
+		$APT_INSTALL curl
+
+		SRC_FILE=ESPHamClock.tgz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tgz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		# type "make" for other options
+		make hamclock-800x480
+		cp hamclock-800x480 $BIN_DIR
+
+		echo "AHRL: Installing esp_hamclock - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flaa
+################################################################################
+
+install_flaa() {
+	if [ $INSTALL_FLAA -eq 1 ]; then
+		echo "AHRL: Installing flaa"
+
+		$APT_INSTALL libfltk1.3-dev
+
+		SRC_FILE=flaa-1.0.2.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing flaa - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flamp
+################################################################################
+
+install_flamp() {
+	if [ $INSTALL_FLAMP -eq 1 ]; then
+		echo "AHRL: Installing flamp"
+
+		$APT_INSTALL flamp
+
+		echo "AHRL: Installing flamp - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flcluster
+################################################################################
+
+install_flcluster() {
+	if [ $INSTALL_FLCLUSTER -eq 1 ]; then
+		echo "AHRL: Installing flcluster"
+
+		$APT_INSTALL libpng-dev
+		$APT_INSTALL libxft-dev
+		$APT_INSTALL libfltk1.3-dev
+
+		SRC_FILE=flcluster-1.1.01.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing flcluster - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_fldigi
+################################################################################
+
+install_fldigi() {
+	if [ $INSTALL_FLDIGI -eq 1 ]; then
+		echo "AHRL: Installing fldigi"
+
+		# Remove repository version, if installed
+		$APT_PURGE fldigi
+
+		# Install version from source code
+		$APT_INSTALL libportaudio2
+		$APT_INSTALL libportaudiocpp0
+		$APT_INSTALL libportaudio-ocaml-dev
+		$APT_INSTALL libudev-dev
+
+		SRC_FILE=fldigi-4.2.09.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing fldigi - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_fllog
+################################################################################
+
+install_fllog() {
+	if [ $INSTALL_FLLOG -eq 1 ]; then
+		echo "AHRL: Installing fllog"
+
+		$APT_INSTALL libfltk1.3-dev
+
+		SRC_FILE=fllog-1.2.9.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing fllog - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flmoxgen
+################################################################################
+
+install_flmoxgen() {
+	if [ $INSTALL_FLMOXGEN -eq 1 ]; then
+		echo "AHRL: Installing fl_moxgen"
+
+		$APT_INSTALL libfltk1.3-dev
+		$APT_INSTALL libhpdf-dev
+
+		SRC_FILE=Fl_MoxGen-1.00.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		make
+		make install
+
+		echo "AHRL: Installing fl_moxgen - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flmsg
+################################################################################
+
+install_flmsg() {
+	if [ $INSTALL_FLMSG -eq 1 ]; then
+		echo "AHRL: Installing flmsg"
+
+		$APT_INSTALL flmsg
+
+		echo "AHRL: Installing flmsg - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flnet
+################################################################################
+
+install_flnet() {
+	if [ $INSTALL_FLNET -eq 1 ]; then
+		echo "AHRL: Installing flnet"
+
+		$APT_INSTALL libsamplerate0-dev
+
+		SRC_FILE=flnet-7.5.0.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing flnet - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flrig
+################################################################################
+
+install_flrig() {
+	if [ $INSTALL_FLRIG -eq 1 ]; then
+		echo "AHRL: Installing flrig"
+
+		# Remove repository version, if installed
+		$APT_PURGE flrig
+
+		# Install version from source code
+		SRC_FILE=flrig-2.0.09.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing flrig - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flwkey
+################################################################################
+
+install_flwkey() {
+	if [ $INSTALL_FLWKEY -eq 1 ]; then
+		echo "AHRL: Installing flwkey"
+
+		SRC_FILE=flwkey-1.2.3.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing flwkey - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_flwrap
+################################################################################
+
+install_flwrap() {
+	if [ $INSTALL_FLWRAP -eq 1 ]; then
+		echo "AHRL: Installing flwrap"
+
+		$APT_INSTALL flwrap
+
+		echo "AHRL: Installing flwrap - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_foxtelem
+################################################################################
+
+install_foxtelem() {
+	if [ $INSTALL_FOXTELEM -eq 1 ]; then
+		echo "AHRL: Installing foxtelem"
+
+		SRC_FILE=FoxTelem_1.12z3_linux.tar.gz
+
+		cd $SRC_DIR
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $BIN_DIR
+
+		# create $BIN_DIR/foxtelem
+		SCRIPT=$BIN_DIR/foxtelem
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+		echo "cd $SRC_DIR/`basename $SRC_FILE .tar.gz`" >> $SCRIPT
+		echo "echo Starting FoxTelem.jar" >> $SCRIPT
+
+		echo "java -Xmx512M -jar ./FoxTelem.jar" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing foxtelem - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_freedv
+################################################################################
+
+install_freedv() {
+	if [ $INSTALL_FREEDV -eq 1 ]; then
+		echo "AHRL: Installing freedv"
+
+		$APT_INSTALL $LIBWXGTK_DEV
+		$APT_INSTALL libspeexdsp-dev
+		$APT_INSTALL libsamplerate0-dev
+		$APT_INSTALL libasound2-dev
+		$APT_INSTALL libao-dev
+		$APT_INSTALL libgsm1-dev
+		$APT_INSTALL python3-dev
+		$APT_INSTALL python3-numpy
+		$APT_INSTALL libpulse-dev
+		$APT_INSTALL libsndfile1-dev
+		$APT_INSTALL sox
+
+		SRC_FILE=freedv-gui-2.1.0.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		./build_linux.sh
+		cp build_linux/src/freedv $BIN_DIR
+
+		echo "AHRL: Installing freedv - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_fritzing
+################################################################################
+
+install_fritzing() {
+	if [ $INSTALL_FRITZING -eq 1 ]; then
+		echo "AHRL: Installing fritzing"
+
+		$APT_INSTALL fritzing
+
+		echo "AHRL: Installing fritzing - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_glfer
+################################################################################
+
+install_glfer() {
+	if [ $INSTALL_GLFER -eq 1 ]; then
+		echo "AHRL: Installing glfer"
+
+		$APT_INSTALL libgtk2.0-dev
+		$APT_INSTALL libglib2.0-dev
+		$APT_INSTALL libgdk-pixbuf-2.0-dev
+		$APT_INSTALL fftw2
+
+		SRC_FILE=glfer-0.4.2.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing glfer - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gnuradio
+################################################################################
+
+install_gnuradio() {
+	if [ $INSTALL_GNURADIO -eq 1 ]; then
+		echo "AHRL: Installing gnuradio"
+
+		$APT_INSTALL gnuradio
+
+		echo "AHRL: Installing gnuradio - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gpredict
+################################################################################
+
+install_gpredict() {
+	if [ $INSTALL_GPREDICT -eq 1 ]; then
+		echo "AHRL: Installing gpredict"
+
+		$APT_INSTALL gpredict
+
+		echo "AHRL: Installing gpredict - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gpsman
+################################################################################
+
+install_gpsman() {
+	if [ $INSTALL_GPSMAN -eq 1 ]; then
+		echo "AHRL: Installing gpsman"
+
+		$APT_INSTALL gpsman
+
+		echo "AHRL: Installing gpsman - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gqrx
+################################################################################
+
+install_gqrx() {
+	if [ $INSTALL_GQRX -eq 1 ]; then
+		echo "AHRL: Installing gqrx"
+
+		$APT_INSTALL $LIBOSMOSDR
+
+		SRC_FILE=gqrx-2.17.7.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake ..
+		make -j $NUM_CPUS
+		make install
+
+		# Remove this problematic package on Raspberry Pi
+		purge_xtrx_dkms;
+
+		echo "AHRL: Installing gqrx - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gridtracker
+################################################################################
+
+install_gridtracker() {
+	if [ $INSTALL_GRIDTRACKER -eq 1 ]; then
+		echo "AHRL: Installing gridtracker"
+
+		# Raspberry Pi
+		if [ "$(arch)" = "aarch64" ]; then
+			$DPKG_INSTALL $TARBALL_DIR/GridTracker2-2.250914.1-arm64.deb
+
+		# Modern 64-bit computer
+		elif [ "$(arch)" = "x86_64" ]; then
+			$DPKG_INSTALL $TARBALL_DIR/GridTracker2-2.250914.1-amd64.deb
+
+		else
+			echo "AHRL: ERROR: unknown machine architecture: $(arch)"
+		fi
+
+		echo "AHRL: Installing gridtracker - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_grig
+################################################################################
+
+install_grig() {
+	if [ $INSTALL_GRIG -eq 1 ]; then
+		echo "AHRL: Installing grig"
+
+		$APT_INSTALL grig
+
+		echo "AHRL: Installing grig - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gsmc
+################################################################################
+
+install_gsmc() {
+	if [ $INSTALL_GSMC -eq 1 ]; then
+		echo "AHRL: Installing gsmc"
+
+		$APT_INSTALL libgdk-pixbuf-2.0-dev
+
+		# Raspberry Pi
+		if [ "$(arch)" = "aarch64" ]; then
+		   GSMC_FILE=gsmc_1.2.1-1_arm64.deb
+		   $DPKG_INSTALL $TARBALL_DIR/$GSMC_FILE
+
+		# Modern 64-bit computer
+		elif [ "$(arch)" = "x86_64" ]; then
+		   GSMC_FILE=gsmc_1.2.1-1_amd64.deb
+		   $DPKG_INSTALL $TARBALL_DIR/$GSMC_FILE
+
+		# 32-bit computer
+		elif [ "$(arch)" = "i686" ]; then
+		   GSMC_FILE=gsmc_1.2.1-1_i386.deb
+		   $DPKG_INSTALL $TARBALL_DIR/$GSMC_FILE
+		else
+			echo "AHRL: ERROR: unknown machine architecture: $(arch)"
+		fi
+
+		echo "AHRL: Installing gsmc - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_gspiceui
+################################################################################
+
+install_gspiceui() {
+	if [ $INSTALL_GSPICEUI -eq 1 ]; then
+		echo "AHRL: Installing gspiceui"
+
+		$APT_INSTALL $LIBWXGTK_DEV
+		$APT_INSTALL libgtk-3-dev
+		$APT_INSTALL libgtkmm-3.0-dev
+		$APT_INSTALL wx3.2-headers
+
+		SRC_FILE=gspiceui-v1.2.87.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+
+		# The compile will fail without this fix.
+		ln -s /usr/include/wx-3.2/wx /usr/include/wx
+		ln -s /usr/lib/aarch64-linux-gnu/wx/include/gtk3-unicode-3.2/wx/setup.h /usr/include/wx-3.2/wx/setup.h
+
+		# edit the src/Makefile to change the GSPICEUI_WXLIB version from 3.0 to 3.2
+		pushd src
+		cat Makefile | sed -e s/GSPICEUI_WXLIB\ =\ 3.0/GSPICEUI_WXLIB\ =\ 3.2/g > Makefile.ahrl
+		mv Makefile Makefile.orig
+		cp Makefile.ahrl Makefile
+		popd
+
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing gspiceui - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ibp
+################################################################################
+
+install_ibp() {
+	if [ $INSTALL_IBP -eq 1 ]; then
+		echo "AHRL: Installing ibp"
+
+		SRC_FILE=ibp-0.21_x.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz | awk -F_ '{print $1}'`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		make clean
+		make
+		make install
+		cp "ibp.1" $MAN1_DIR
+		chmod 644 $MAN1_DIR/ibp.1
+
+		echo "AHRL: Installing ibp - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_js8call
+################################################################################
+
+install_js8call() {
+	if [ $INSTALL_JS8CALL -eq 1 ]; then
+		echo "AHRL: Installing js8call"
+
+		$APT_INSTALL js8call
+
+		echo "AHRL: Installing js8call - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_js8spotter
+################################################################################
+
+install_js8spotter() {
+	if [ $INSTALL_JS8SPOTTER -eq 1 ]; then
+		echo "AHRL: Installing js8spotter"
+
+		SRC_FILE=js8spotter-117_src.zip
+
+		$APT_INSTALL python3-tk
+		$APT_INSTALL python3-tksnack
+		$APT_INSTALL python3-pil
+		$APT_INSTALL python3-pil.imagetk
+
+		SRC_FILE_DIR=/home/$USERNAME/`basename $SRC_FILE .zip`
+
+		# Create $BIN_DIR/install_js8spotter
+		SCRIPT=$BIN_DIR/install_js8spotter
+		rm -f $SCRIPT
+
+		JS8SPOTTER_DESKTOP_FILE=/home/$USERNAME/.local/share/applications/js8spotter.desktop
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+		echo "cd /home/$USERNAME" >> $SCRIPT
+		echo "unzip $TARBALL_DIR/$SRC_FILE" >> $SCRIPT
+		echo "chmod 755 $SRC_FILE_DIR" >> $SCRIPT
+		echo "cd $SRC_FILE_DIR" >> $SCRIPT
+		echo "chmod 755 js8spotter.py" >> $SCRIPT
+
+		# Now, create the menu file
+		echo ""  >> $SCRIPT
+
+		echo "mkdir -p /home/$USERNAME/.local/share/applications" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "echo \"[Desktop Entry]\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Type=Application\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Name=JS8Spotter\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Comment=Companion Program for JS8Call\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Exec=$SRC_FILE_DIR/js8spotter.py\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Icon=$SRC_FILE_DIR/js8spotter.ico\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+
+		echo "echo \"Path=$SRC_FILE_DIR\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"Terminal=false\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+		echo "echo \"StartupNotify=false\" >> $JS8SPOTTER_DESKTOP_FILE" >> $SCRIPT
+
+		echo "echo \"chmod 644 $JS8SPOTTER_DESKTOP_FILE\"" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		pkexec --user $USERNAME $SCRIPT
+
+		# Create $BIN_DIR/install_js8spotter_menu
+		# Run it inside of install_ahrl_menus
+		# Created also for subsequent users to install.
+		MENU_SCRIPT=$BIN_DIR/install_js8spotter_menu
+		rm -f $MENU_SCRIPT
+
+		echo "#!/bin/bash" >> $MENU_SCRIPT
+		echo ""  >> $MENU_SCRIPT
+		echo "cd $LOCAL_SHARE_DIR/desktop-directories" >> $MENU_SCRIPT
+
+		# this is fugly ...
+		echo "xdg-desktop-menu install --novendor Andy_Ham_Radio_Linux.directory Digital_Modes.directory /home/$USERNAME/.local/share/applications/js8spotter.desktop" >> $MENU_SCRIPT
+
+		chmod 755 $MENU_SCRIPT
+
+		echo "AHRL: Installing js8spotter - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_jtdx
+################################################################################
+
+install_jtdx() {
+	if [ $INSTALL_JTDX -eq 1 ]; then
+		echo "AHRL: Installing jtdx"
+
+		$APT_INSTALL jtdx
+
+		echo "AHRL: Installing jtdx - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_kicad
+################################################################################
+
+install_kicad() {
+	if [ $INSTALL_KICAD -eq 1 ]; then
+		echo "AHRL: Installing kicad"
+
+		$APT_INSTALL kicad
+
+		echo "AHRL: Installing kicad - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_klog
+################################################################################
+
+install_klog() {
+	if [ $INSTALL_KLOG -eq 1 ]; then
+		echo "AHRL: Installing klog"
+
+		$APT_INSTALL klog
+
+		echo "AHRL: Installing klog - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_libhamlib4
+################################################################################
+
+install_libhamlib4() {
+	if [ $INSTALL_LIBHAMLIB4 -eq 1 ]; then
+		echo "AHRL: Installing libhamlib4"
+
+		$APT_INSTALL libhamlib4
+
+		echo "AHRL: Installing libhamlib4 - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_linpac
+################################################################################
+
+install_linpac() {
+	if [ $INSTALL_LINPAC -eq 1 ]; then
+		echo "AHRL: Installing linpac"
+
+		$APT_INSTALL libax25
+		$APT_INSTALL linpac
+
+		echo "AHRL: Installing linpac - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_linrad
+################################################################################
+
+install_linrad() {
+	if [ $INSTALL_LINRAD -eq 1 ]; then
+		echo "AHRL: Installing linrad"
+
+		SRC_FILE=lir05-02.zip
+
+		$APT_INSTALL nasm
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=linrad
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		mkdir -p $SRC_FILE_DIR
+		cd $SRC_FILE_DIR
+		unzip $TARBALL_DIR/$SRC_FILE
+		chmod u+x ./configure
+		./configure
+		make -j $NUM_CPUS xlinrad64
+		cp xlinrad64 $BIN_DIR
+		cp cmake/linrad.ico $LOCAL_SHARE_DIR/icons
+
+		echo "AHRL: Installing linrad - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_mfc_gpl
+################################################################################
+
+install_mfc_gpl() {
+	if [ $INSTALL_MFC_GPL -eq 1 ]; then
+		echo "AHRL: Installing mfc_gpl"
+
+		# libserial-0.1.tar.gz
+		# mfc_gpl_0.02.tar.gz
+
+		echo "AHRL: Installing mfc_gpl - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_morse_runner
+################################################################################
+
+install_morse_runner() {
+	if [ $INSTALL_MORSE_RUNNER -eq 1 ]; then
+
+		echo "AHRL: Installing morse_runner"
+
+		if [ "$(arch)" = "aarch64" ]; then
+			echo "AHRL: cannot run morse_runner on Raspberry Pi - sorry."
+		else
+			SRC_FILE=Morse.Runner.1.85.3.zip
+
+			cd $SRC_DIR
+
+			ORIG_SRC_FILE_DIR=Morse\ Runner\ 1.85.3
+			SRC_FILE_DIR=Morse_Runner_1.85.3
+
+			if [ -d "$SRC_FILE_DIR" ]; then
+				mkdir -p $DELETE_DIR
+				mv $SRC_FILE_DIR $DELETE_DIR
+			fi
+
+			unzip $TARBALL_DIR/$SRC_FILE
+
+			mv "$ORIG_SRC_FILE_DIR" $SRC_FILE_DIR
+
+			# Create the file in $BIN_DIR to run morse_runner
+			BIN_FILE_NAME=$BIN_DIR/morse_runner
+			rm -f $BIN_FILE_NAME
+
+			echo "#!/bin/sh" >> $BIN_FILE_NAME
+			echo "" >> $BIN_FILE_NAME
+
+			echo "if [ \"\$USER\" = \"root\" ]; then" >> $BIN_FILE_NAME
+			echo "    echo \"morse_runner: Don't run this as root - exiting.\"" >> $BIN_FILE_NAME
+			echo "    exit" >> $BIN_FILE_NAME
+			echo "fi" >> $BIN_FILE_NAME
+			echo "" >> $BIN_FILE_NAME
+
+			echo "if [ ! -d \"\/home/\$USER/$SRC_FILE_DIR\" ]; then" >> $BIN_FILE_NAME
+			echo "    mkdir /home/\$USER/$SRC_FILE_DIR" >> $BIN_FILE_NAME
+			echo "    cp $SRC_DIR/$SRC_FILE_DIR/* /home/\$USER/$SRC_FILE_DIR" >> $BIN_FILE_NAME
+			echo "fi" >> $BIN_FILE_NAME
+			echo "" >> $BIN_FILE_NAME
+			echo "cd /home/\$USER/$SRC_FILE_DIR" >> $BIN_FILE_NAME
+			echo "wine ./MorseRunner.exe" >> $BIN_FILE_NAME
+
+			chmod 755 $BIN_FILE_NAME
+		fi
+
+		echo "AHRL: Installing morse_runner - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_mshv
+################################################################################
+
+install_mshv() {
+	if [ $INSTALL_MSHV -eq 1 ]; then
+		echo "AHRL: Installing mshv"
+
+		$APT_INSTALL libqt5websockets5-dev libasound2-dev
+
+		SRC_FILE=MSHV_2763_Full_Source_Code.zip
+
+		cd $SRC_DIR
+		SRC_FILE_DIR=`basename $SRC_FILE _Full_Source_Code.zip`
+
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+
+		# Create a script in $BIN_DIR to run the program.
+		# It must run in its source directory.
+		# Do this first, so that the Raspberry Pi decision (below)
+		# will work correctly.
+
+		SCRIPT=$BIN_DIR/MSHV
+		rm -f $BIN_DIR/MSHV*
+
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "cd $SRC_DIR/$SRC_FILE_DIR/bin" >> $SCRIPT
+
+		# Resume building the source code
+		if [ "$(arch)" = "aarch64" ]; then
+			# use this one for Raspberry Pi
+			qmake MSHV_ARM_PI.pro
+			echo "./MSHV_ARM_PI" >> $SCRIPT
+		else
+			# this one works on non-Raspberry Pi computers
+			qmake MSHV_x86_64.pro
+			echo "./MSHV_x86_64" >> $SCRIPT
+		fi
+
+		make -j $NUM_CPUS
+
+		# Don't forget to make the script executable
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing mshv - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_mvoice
+################################################################################
+
+install_mvoice() {
+	if [ $INSTALL_MVOICE -eq 1 ]; then
+		echo "AHRL: Installing mvoice"
+
+		$APT_INSTALL libasound2-dev
+		$APT_INSTALL libcurl4-gnutls-dev
+		$APT_INSTALL gettext
+		$APT_INSTALL libfltk1.3-dev
+		$APT_INSTALL libopendht-dev
+
+		# This is needed to workaround a bug with "Open Dashboard" in mvoice GUI
+		$APT_INSTALL $CHROMIUM
+
+		SRC_FILE=mvoice-main.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+
+		# Create mvoice.mk
+		cat example.mk | sed -e s/'BASEDIR = $(HOME)'/'# BASEDIR = $(HOME)'/g > foo1.mk
+		echo "BASEDIR = /usr/local" >> foo1.mk
+		mv foo1.mk mvoice.mk
+
+		# Compile the code and install it
+		make
+		make install
+
+		echo "AHRL: Installing mvoice - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_nanovna_saver
+#
+# NOTE: The code for 0.7.3 is horribly broken.  Don't even bother trying
+# until a new release occurs.
+# See: https://github.com/NanoVNA-Saver/nanovna-saver/issues/808
+################################################################################
+
+install_nanovna_saver() {
+	if [ $INSTALL_NANOVNA_SAVER -eq 1 ]; then
+
+		echo "AHRL: Installing nanovna-saver"
+
+		$APT_INSTALL libxcb-cursor0
+
+		# Create $BIN_DIR/install_nanovna_saver
+		SCRIPT=$BIN_DIR/install_nanovna_saver
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "cd /home/$USERNAME" >> $SCRIPT
+		echo "python3 -m venv .venv_nanovna_saver" >> $SCRIPT
+		echo "source .venv_nanovna_saver/bin/activate" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "python3 -m pip install --upgrade pip" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "git clone https://github.com/NanoVNA-Saver/nanovna-saver" >> $SCRIPT
+		echo "cd nanovna-saver" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "deactivate" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		pkexec --user $USERNAME $SCRIPT
+
+		# Create the script to run nanovna_saver
+		SCRIPT=$BIN_DIR/run_nanovna_saver
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo "" >> $SCRIPT
+
+		echo "cd /home/$USERNAME" >> $SCRIPT
+		echo "source .venv_nanovna_saver/bin/activate" >> $SCRIPT
+		echo "nanovna_saver" >> $SCRIPT
+		echo "deactivate" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing nanovna-saver - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_ngspice
+################################################################################
+
+install_ngspice() {
+	if [ $INSTALL_NGSPICE -eq 1 ]; then
+		echo "AHRL: Installing ngspice"
+
+		$APT_INSTALL ngspice
+
+		echo "AHRL: Installing ngspice - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_noaa_apt
+################################################################################
+
+install_noaa_apt() {
+	if [ $INSTALL_NOAA_APT -eq 1 ]; then
+		echo "AHRL: Installing noaa_apt"
+
+		# Raspberry Pi
+		if [ "$(arch)" = "aarch64" ]; then
+			SRC_FILE=noaa-apt-1.4.1-aarch64-linux-gnu.zip
+
+		# Modern 64-bit computer
+		elif [ "$(arch)" = "x86_64" ]; then
+			SRC_FILE=noaa-apt-1.4.1-x86_64-linux-gnu.zip
+		else
+			echo "AHRL: ERROR: unknown machine architecture: $(arch)"
+		fi
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=noaa_apt-1.4.1
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		mkdir -p $SRC_FILE_DIR
+		cd $SRC_FILE_DIR
+		unzip $TARBALL_DIR/$SRC_FILE
+
+		SCRIPT=$BIN_DIR/start_noaa_apt
+		rm -f $SCRIPT
+
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "cd /usr/local/src/$SRC_FILE_DIR" >> $SCRIPT
+		echo "./run-noaa-apt.sh" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing noaa_apt - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_not1mm
+################################################################################
+
+install_not1mm() {
+	if [ $INSTALL_NOT1MM -eq 1 ]; then
+
+		echo "AHRL: Installing not1mm"
+
+		$APT_INSTALL libxcb-cursor0
+
+		# Create $BIN_DIR/install_not1mm
+		SCRIPT=$BIN_DIR/install_not1mm
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "cd /home/$USERNAME" >> $SCRIPT
+		echo "python3 -m venv .venv_not1mm" >> $SCRIPT
+		echo "source .venv_not1mm/bin/activate" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "python3 -m pip install --upgrade pip" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "python3 -m pip install not1mm" >> $SCRIPT
+		echo "python3 -m pip install -U not1mm" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "deactivate" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		pkexec --user $USERNAME $SCRIPT
+
+		# Create the script to run not1mm
+		SCRIPT=$BIN_DIR/run_not1mm
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo "" >> $SCRIPT
+
+		echo "cd /home/$USERNAME/.venv_not1mm/bin" >> $SCRIPT
+		echo "./python3 not1mm" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing not1mm - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_notepadqq
+################################################################################
+
+install_notepadqq() {
+	if [ $INSTALL_NOTEPADQQ -eq 1 ]; then
+		echo "AHRL: Installing notepadqq"
+
+		$APT_INSTALL notepadqq
+
+		echo "AHRL: Installing notepadqq - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_open_wouxon
+################################################################################
+
+install_open_wouxon() {
+	if [ $INSTALL_OPEN_WOUXON -eq 1 ]; then
+		echo "AHRL: Installing open wouxon"
+
+		SRC_FILE=owx-20220525.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing open wouxon - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_pipx
+################################################################################
+
+install_pipx() {
+	if [ $INSTALL_PIPX -eq 1 ]; then
+		echo "AHRL: Installing pipx"
+
+		$APT_INSTALL pipx
+
+		echo "AHRL: Installing pipx - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_putty
+################################################################################
+
+install_putty() {
+	if [ $INSTALL_PUTTY -eq 1 ]; then
+		echo "AHRL: Installing putty"
+
+		$APT_INSTALL putty
+
+		echo "AHRL: Installing putty - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_pyautogui
+################################################################################
+
+install_pyautogui() {
+	if [ $INSTALL_PYAUTOGUI -eq 1 ]; then
+		echo "AHRL: Installing pyautogui"
+
+		$APT_INSTALL python3-tk python3-dev scrot
+		python3 -m venv /home/$USERNAME/.venv_pyautogui
+
+		source /home/$USERNAME/.venv_pyautogui/bin/activate
+
+		python3 -m pip install --upgrade pip
+		python3 -m pip install pyautogui
+
+		OUTFILE=/home/$USERNAME/.venv_pyautogui/bin/test_menus.py
+
+		echo "#!/home/$USERNAME/.venv_pyautogui/bin/python3" > $OUTFILE
+		echo "" >> $OUTFILE
+		cat $BIN_DIR/test_menus.py >> $OUTFILE
+		chown -R $USERNAME:$USERNAME /home/$USERNAME/.venv_pyautogui
+		chmod 744 $OUTFILE
+
+		deactivate
+
+		rm $BIN_DIR/test_menus.py
+
+		echo "AHRL: Installing pyautogui - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qgrid
+################################################################################
+
+install_qgrid() {
+	if [ $INSTALL_QGRID -eq 1 ]; then
+		echo "AHRL: Installing qgrid"
+
+		$APT_INSTALL libqt5widgets5 libqt5multimediawidgets5
+
+		SRC_FILE=qgrid_3_2.tgz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE _3_2.tgz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		qmake qgrid_3.pro
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing qgrid - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qlog
+################################################################################
+
+install_qlog() {
+	if [ $INSTALL_QLOG -eq 1 ]; then
+		echo "AHRL: Installing qlog"
+
+		$APT_INSTALL qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libsqlite3-dev \
+			     libhamlib++-dev libqt5charts5-dev qttools5-dev-tools libqt5keychain1 \
+			     qt5keychain-dev qtwebengine5-dev build-essential libqt5serialport5-dev \
+			     pkg-config libqt5websockets5-dev
+
+		SRC_FILE=QLog-0.46.2.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		qmake QLog.pro
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing qlog - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qrq
+################################################################################
+
+install_qrq() {
+	if [ $INSTALL_QRQ -eq 1 ]; then
+		echo "AHRL: Installing qrq"
+
+		$APT_INSTALL qrq
+
+		echo "AHRL: Installing qrq - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qsstv
+################################################################################
+
+install_qsstv() {
+	if [ $INSTALL_QSSTV -eq 1 ]; then
+		echo "AHRL: Installing qsstv"
+
+		$APT_INSTALL qsstv
+
+		echo "AHRL: Installing qsstv - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qtel
+################################################################################
+
+install_qtel() {
+	if [ $INSTALL_QTEL -eq 1 ]; then
+		echo "AHRL: Installing qtel"
+
+		$APT_INSTALL qtel
+
+		echo "AHRL: Installing qtel - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_qttinysa
+################################################################################
+
+install_qttinysa() {
+	if [ $INSTALL_QTTINYSA -eq 1 ]; then
+		echo "AHRL: Installing qttinysa"
+
+		$APT_INSTALL python3-pyqt5.qtsql
+		$APT_INSTALL python3-platformdirs
+		$APT_INSTALL python3-serial
+
+		SRC_FILE=QtTinySA-1.2.2.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		# Create a script to run QtTinySA
+		SCRIPT=$BIN_DIR/run_qttinysa
+		rm -fr $SCRIPT
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "cd $SRC_DIR/$SRC_FILE_DIR/src" >> $SCRIPT
+		echo "python3 ./QtTinySA.py" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing qttinysa - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_quisk
+################################################################################
+
+install_quisk() {
+	if [ $INSTALL_QUISK -eq 1 ]; then
+		echo "AHRL: Installing quisk"
+
+		# Remove repository version, if installed
+		$APT_PURGE quisk
+
+		# Install needed python code
+		$APT_INSTALL python3-setuptools
+
+		# Install version from source code
+		SRC_FILE=quisk-4.2.46.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+		make
+
+		# Create a script to execute quisk
+		SCRIPT=/usr/local/bin/quisk
+
+		rm -fr $SCRIPT
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "cd $SRC_DIR/$SRC_FILE_DIR" >> $SCRIPT
+		echo "./quisk.py" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing quisk - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_rf_exposure_calc
+################################################################################
+
+install_rf_exposure_calc() {
+	if [ $INSTALL_RF_EXPOSURE_CALC -eq 1 ]; then
+		echo "AHRL: Installing rf_exposure_calc"
+
+		SCRIPT=$BIN_DIR/start_rf_exp_calc
+		rm -f $SCRIPT
+
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "/usr/bin/firefox http://hintlink.com/power_density.htm &" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing rf_exposure_calc - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_rtl_sdr_v4_driver
+#           Reference link:  https://www.rtl-sdr.com/v4/
+################################################################################
+
+install_rtl_sdr_v4_driver() {
+	if [ $INSTALL_RTL_SDR_V4_DRIVER -eq 1 ]; then
+		echo "AHRL: Installing rtl_sdr_v4_driver"
+
+		# Purge the previous driver.
+		# Don't do the APT_PURGE or some programs will go away due to the dependencies.
+		# Delete the driver manually and the programs will pick up the RTL-SDR BLOG V4 driver.
+
+		echo "AHRL: removing old rtl_sdr driver"
+
+		rm -fr /usr/lib/librtlsdr* /usr/local/lib/librtlsdr*
+		rm -fr /usr/include/rtl-sdr* /usr/local/include/rtl-sdr*
+		rm -fr /usr/local/bin/rtl_*
+
+		echo "AHRL: removing old rtl_sdr driver - DONE"
+
+		cd $SRC_DIR
+
+		# If the RTL-SDR Blog V4 driver was previously installed, remove it.
+		if [ -d rtl-sdr-blog ]; then
+			rm -fr rtl-sdr-blog
+		fi
+
+		# Install the RTL-SDR Blog V4 driver
+		$APT_INSTALL libusb-1.0-0-dev git cmake pkg-config
+		git clone https://github.com/rtlsdrblog/rtl-sdr-blog
+
+		cd rtl-sdr-blog
+		mkdir build
+		cd build
+		cmake ../ -DINSTALL_UDEV_RULES=ON
+		make
+		make install
+		cp ../rtl-sdr.rules /etc/udev/rules.d/
+
+		cp /usr/local/lib/librtlsdr.a /usr/lib/$(arch)-linux-gnu/
+		cp /usr/local/lib/librtlsdr.so.0.6git /usr/lib/$(arch)-linux-gnu/
+		cd /usr/lib/$(arch)-linux-gnu
+		ln -s librtlsdr.so.0.6git librtlsdr.so
+		ln -s librtlsdr.so.0.6git librtlsdr.so.0
+		ln -s librtlsdr.so.0.6git librtlsdr.so.2
+		ldconfig
+
+		# Blacklist the DVB-T TV drivers.
+		echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-dvb_usb_rtl28xxu.conf
+
+		echo "AHRL: Installing rtl_sdr_v4_driver - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_satdump
+################################################################################
+
+install_satdump() {
+	if [ $INSTALL_SATDUMP -eq 1 ]; then
+		echo "AHRL: Installing satdump"
+
+		# Instatll the prerequisites
+		$APT_INSTALL g++
+		$APT_INSTALL pkgconf
+		$APT_INSTALL libfftw3-dev
+		$APT_INSTALL libpng-dev
+		$APT_INSTALL libtiff-dev
+		$APT_INSTALL libjemalloc-dev
+
+		$APT_INSTALL $LIBVOLK
+
+		$APT_INSTALL libnng-dev
+		#$APT_INSTALL #librtlsdr-dev see install_rtl_sdr_v4_driver
+		$APT_INSTALL libhackrf-dev
+		$APT_INSTALL libairspy-dev
+		$APT_INSTALL libairspyhf-dev
+		$APT_INSTALL libglfw3-dev
+		$APT_INSTALL zenity
+		$APT_INSTALL libzstd-dev
+		$APT_INSTALL libomp-dev
+		$APT_INSTALL ocl-icd-opencl-dev
+		$APT_INSTALL intel-opencl-icd
+		$APT_INSTALL libhdf5-dev
+
+		# Install the source tarball
+		SRC_FILE=SatDump-1.2.2.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing satdump - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_sdr_plus_plus
+################################################################################
+
+install_sdr_plus_plus() {
+	if [ $INSTALL_SDR_PLUS_PLUS -eq 1 ]; then
+		echo "AHRL: Installing sdr_plus_plus"
+
+		$APT_INSTALL libfftw3-dev
+		$APT_INSTALL libglfw3-dev
+
+		$APT_INSTALL $LIBVOLK
+
+		$APT_INSTALL libzstd-dev
+		$APT_INSTALL libairspy-dev
+		$APT_INSTALL libairspyhf-dev
+		$APT_INSTALL librtaudio-dev
+		$APT_INSTALL libhackrf-dev
+		$APT_INSTALL libiio-dev
+		$APT_INSTALL libad9361-dev
+		$APT_INSTALL libsoapysdr-dev
+
+		# Cleanup a previous installation
+		cd $SRC_DIR
+		rm -fr SDRPlusPlus-nightly
+
+		SRC_FILE=SDRPlusPlus-master.zip
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake ..
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing sdr_plus_plus - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_solar_data
+################################################################################
+
+install_solar_data() {
+	if [ $INSTALL_SOLAR_DATA -eq 1 ]; then
+		echo "AHRL: Installing solar_data"
+
+		# This needs the "display" command
+		$APT_INSTALL graphicsmagick-imagemagick-compat
+
+		SCRIPT=$BIN_DIR/get_solar_data
+		rm -f $SCRIPT
+
+		echo "#!/bin/sh" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "#" >> $SCRIPT
+		echo "# Please consider making a donation to Paul (N0NBH) to thank him for kindly" >> $SCRIPT
+		echo "# providing the banners and widgets at no cost for our use." >> $SCRIPT
+		echo "#" >> $SCRIPT
+		echo "" >> $SCRIPT
+		echo "wget http://www.hamqsl.com/solar101vhf.php -O /tmp/solar.gif" >> $SCRIPT
+		echo "display /tmp/solar.gif &" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing solar_data - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_source_libs
+#
+# The libraries and tools listed in the "repo_libs" array are needed by
+# software that is installed directly from source code (that is, software which
+# is not available in a repository.
+################################################################################
+
+install_source_libs() {
+	if [ $INSTALL_SOURCE_LIBS -eq 1 ]; then
+		echo "AHRL: Installing tools and libraries needed by source code compilation"
+
+		repo_libs=("build-essential" "libncurses-dev" "libqt5multimediawidgets5"
+			   "libqt5widgets5" "qtbase5-dev" "qt5-qmake" "cmake" "unzip" "wget" "git"
+			   "autoconf" "automake" "libtool")
+
+		for i in ${repo_libs[@]}; do
+			echo "AHRL: Installing $i from the repository"
+			$APT_INSTALL $i
+			echo "AHRL: Installing $i from the repository - DONE"
+		done
+		echo "AHRL: Installing tools and libraries needed by source code compilation - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_splat
+################################################################################
+
+install_splat() {
+	if [ $INSTALL_SPLAT -eq 1 ]; then
+		echo "AHRL: Installing splat"
+
+		$APT_INSTALL splat
+
+		echo "AHRL: Installing splat - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_sunclock
+################################################################################
+
+install_sunclock() {
+	if [ $INSTALL_SUNCLOCK -eq 1 ]; then
+		echo "AHRL: Installing sunclock"
+
+		$APT_INSTALL sunclock
+
+		echo "AHRL: Installing sunclock - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_svxlink
+################################################################################
+
+install_svxlink() {
+	if [ $INSTALL_SVXLINK -eq 1 ]; then
+		echo "AHRL: Installing svxlink"
+
+		$APT_INSTALL svxlink-server
+
+		echo "AHRL: Installing svxlink - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_svxreflector
+################################################################################
+
+install_svxreflector() {
+	if [ $INSTALL_SVXREFLECTOR -eq 1 ]; then
+		echo "AHRL: Installing svxreflector"
+
+		$APT_INSTALL svxreflector
+
+		echo "AHRL: Installing svxreflector - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_sylpheed
+################################################################################
+
+install_sylpheed() {
+	if [ $INSTALL_SYLPHEED -eq 1 ]; then
+		echo "AHRL: Installing sylpheed"
+
+		$APT_INSTALL sylpheed
+
+		echo "AHRL: Installing sylpheed - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_tqsl
+################################################################################
+
+install_tqsl() {
+	if [ $INSTALL_TQSL -eq 1 ]; then
+		echo "AHRL: Installing tqsl"
+
+		$APT_INSTALL openssl libssl-dev expat zlib1g-dev libsqlite3-dev libcurlpp-dev $LIBWXGTK_DEV
+
+		SRC_FILE=tqsl-2.8.2.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		cmake .
+		make -j $NUM_CPUS
+		make install
+		ldconfig
+
+		echo "AHRL: Installing tqsl - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_tt3_gpl
+################################################################################
+
+install_tt3_gpl() {
+	if [ $INSTALL_TT3_GPL -eq 1 ]; then
+		echo "AHRL: Installing tt3_gpl"
+
+		# libserial-0.1.tar.gz
+		# tt3_gpl_0.02.tar.gz
+
+		echo "AHRL: Installing tt3_gpl - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_virtual_radar_server
+################################################################################
+
+install_virtual_radar_server() {
+	if [ $INSTALL_VIRTUAL_RADAR_SERVER -eq 1 ]; then
+		echo "AHRL: Installing virtual_radar_server"
+
+		$APT_INSTALL mono-complete
+
+		# Install two tarballs for this program.
+		SRC_FILE=VirtualRadar.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=VirtualRadar
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		mkdir -p $SRC_FILE_DIR
+		cd $SRC_FILE_DIR
+
+		# This one is unique because the SRC_FILE does not unpack itself
+		# into a properly named directory.
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+
+		# This file is a patch to fix a runtime error.
+		SRC_FILE=VirtualRadar.exe.config.tar
+		tar xvf $TARBALL_DIR/$SRC_FILE
+
+		# Fix file permissions
+		cd $SRC_DIR
+		chown -R root:root $SRC_FILE_DIR
+
+		# create $BIN_DIR/start_virtual_radar_server
+		SCRIPT=$BIN_DIR/start_virtual_radar_server
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+
+		echo "dump1090-mutability --net --quiet &" >> $SCRIPT
+		echo "(sleep 5s; firefox http://localhost:8080/VirtualRadar) &" >> $SCRIPT
+		echo "mono /usr/local/src/VirtualRadar/VirtualRadar.exe" >> $SCRIPT
+		echo "killall -9 dump1090-mutability" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing virtual_radar_server - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_wfview
+################################################################################
+
+install_wfview() {
+	if [ $INSTALL_WFVIEW -eq 1 ]; then
+		echo "AHRL: Installing wfview"
+
+		# Remove repository version, if installed
+		$APT_PURGE wfview
+
+		# Install version from source code
+		$APT_INSTALL libqt5gamepad5-dev
+		$APT_INSTALL libqt5serialport5 libqt5serialport5-dev
+		$APT_INSTALL qtmultimedia5-dev
+		$APT_INSTALL libqcustomplot-dev libqcustomplot2.1
+		$APT_INSTALL libhidapi-dev
+
+		SRC_FILE=wfview-v2.11.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		qmake ../wfview.pro
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing wfview - DONE"
+	fi
+}
+
+#################################################################################
+# Function: install_wine
+#################################################################################
+
+install_wine() {
+	if [ $INSTALL_WINE -eq 1 ]; then
+
+		echo "AHRL: Installing wine32"
+
+		if [ "$(arch)" = "aarch64" ]; then
+			echo "AHRL: cannot install wine on Raspberry Pi - sorry."
+		else
+			dpkg --add-architecture i386 && $APT_UPDATE
+			$APT_INSTALL wine32:i386
+			$APT_INSTALL winbind
+		fi
+
+		echo "AHRL: Installing wine32 - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_wordsworth
+################################################################################
+
+install_wordsworth() {
+	if [ $INSTALL_WORDSWORTH -eq 1 ]; then
+		echo "AHRL: Installing wordsworth"
+
+		SRC_FILE=wordsworth_0.3.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+
+		cp text_to_cw.pl $BIN_DIR
+		chmod 755 $BIN_DIR/text_to_cw.pl
+
+		cp gen_cw_words.pl $BIN_DIR
+		chmod 755 $BIN_DIR/gen_cw_words.pl
+
+		echo "AHRL: Installing wordsworth - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_wsjtx
+################################################################################
+
+install_wsjtx() {
+	if [ $INSTALL_WSJTX -eq 1 ]; then
+		echo "AHRL: Installing wsjtx"
+
+		# Remove repository version, if installed
+		$APT_PURGE wsjtx
+
+		# Install version from source code
+		$APT_INSTALL gfortran
+		$APT_INSTALL libboost-all-dev
+		$APT_INSTALL qttools5-dev-tools
+		$APT_INSTALL qttools5-dev
+		$APT_INSTALL qtmultimedia5-dev
+		$APT_INSTALL libqt5serialport5 libqt5serialport5-dev
+		$APT_INSTALL libfftw3-dev
+		$APT_INSTALL libreadline-dev
+		$APT_INSTALL libusb-1.0-0-dev
+		$APT_INSTALL libudev-dev
+
+		SRC_FILE=wsjtx-2.7.0.tgz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tgz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake -DWSJT_SKIP_MANPAGES=ON -DWSJT_GENERATE_DOCS=OFF ..
+		cmake --build . --parallel $NUM_CPUS
+		cmake --build . --target install
+
+		mv /usr/local/bin/wsjtx /usr/local/bin/wsjtx_orig
+
+		echo "AHRL: Installing wsjtx - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_wsjtx_improved
+################################################################################
+
+install_wsjtx_improved() {
+	if [ $INSTALL_WSJTX_IMPROVED -eq 1 ]; then
+		echo "AHRL: Installing wsjtx_improved"
+
+		# Remove repository version, if installed
+		#$APT_PURGE wsjtx
+
+		# Install version from source code
+		$APT_INSTALL gfortran
+		$APT_INSTALL libboost-all-dev
+		$APT_INSTALL qttools5-dev-tools
+		$APT_INSTALL qttools5-dev
+		$APT_INSTALL qtmultimedia5-dev
+		$APT_INSTALL libqt5serialport5 libqt5serialport5-dev
+		$APT_INSTALL libfftw3-dev
+		$APT_INSTALL libreadline-dev
+		$APT_INSTALL libusb-1.0-0-dev
+		$APT_INSTALL libudev-dev
+
+		SRC_FILE=wsjtx-3.0.0_improved_PLUS_250924.tgz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE _improved_PLUS_250924.tgz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+		mkdir build
+		cd build
+		cmake -DWSJT_SKIP_MANPAGES=ON -DWSJT_GENERATE_DOCS=OFF ..
+		cmake --build . --parallel $NUM_CPUS
+		cmake --build . --target install
+
+		mv /usr/local/bin/wsjtx /usr/local/bin/wsjtx_improved
+		mv /usr/local/bin/wsjtx_orig /usr/local/bin/wsjtx
+
+		echo "AHRL: Installing wsjtx_improved - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_wwl
+################################################################################
+
+install_wwl() {
+	if [ $INSTALL_WWL -eq 1 ]; then
+		echo "AHRL: Installing wwl"
+
+		$APT_INSTALL wwl
+
+		echo "AHRL: Installing wwl - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xastir
+################################################################################
+
+install_xastir() {
+	if [ $INSTALL_XASTIR -eq 1 ]; then
+		echo "AHRL: Installing xastir"
+
+		$APT_INSTALL xastir
+		chmod o+x /usr/bin/xastir
+
+		echo "AHRL: Installing xastir - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xcwcp
+################################################################################
+
+install_xcwcp() {
+	if [ $INSTALL_XCWCP -eq 1 ]; then
+		echo "AHRL: Installing xcwcp"
+
+		$APT_INSTALL xcwcp
+
+		echo "AHRL: Installing xcwcp - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xdx
+################################################################################
+
+install_xdx() {
+	if [ $INSTALL_XDX -eq 1 ]; then
+		echo "AHRL: Installing xdx"
+
+		$APT_INSTALL xdx
+
+		echo "AHRL: Installing xdx - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xlog
+################################################################################
+
+install_xlog() {
+	if [ $INSTALL_XLOG -eq 1 ]; then
+		echo "AHRL: Installing xlog"
+
+		# OK for version 2.0.24
+		# $APT_INSTALL xlog
+
+		# Version 2.0.25 is newer and not yet part of the repository.
+
+		$APT_INSTALL libhamlib-dev
+
+		SRC_FILE=xlog-2.0.25.tar.gz
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.gz`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xzvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd $SRC_FILE_DIR
+
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing xlog - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xnec2c
+################################################################################
+
+install_xnec2c() {
+	if [ $INSTALL_XNEC2C -eq 1 ]; then
+		echo "AHRL: Installing xnec2c"
+
+		SRC_FILE=xnec2c-4.4.17.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .zip`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		unzip $TARBALL_DIR/$SRC_FILE
+		cd $SRC_FILE_DIR
+
+		./autogen.sh 
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing xnec2c - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xosview
+################################################################################
+
+install_xosview() {
+	if [ $INSTALL_XOSVIEW -eq 1 ]; then
+		echo "AHRL: Installing xosview"
+
+		$APT_INSTALL xosview
+
+		echo "AHRL: Installing xosview - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xwefax
+################################################################################
+
+install_xwefax() {
+	if [ $INSTALL_XWEFAX -eq 1 ]; then
+		echo "AHRL: Installing xwefax"
+
+		$APT_INSTALL libgtk-3-dev
+
+		SRC_FILE=xwefax-2.4.4.tar.bz2
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.bz2`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xjvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd `basename $SRC_FILE .tar.bz2`
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing xwefax - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_xwxapt
+################################################################################
+
+install_xwxapt() {
+	if [ $INSTALL_XWXAPT -eq 1 ]; then
+		echo "AHRL: Installing xwxapt"
+
+		#$APT_INSTALL librtlsdr-dev  see install_rtl_sdr_v4_driver
+		$APT_INSTALL $LIBWXGTK_DEV
+
+		SRC_FILE=xwxapt-3.4.3.tar.bz2
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=`basename $SRC_FILE .tar.bz2`
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		tar xjvf $TARBALL_DIR/$SRC_FILE
+		chown -R root:root $SRC_FILE_DIR
+
+		cd `basename $SRC_FILE .tar.bz2`
+		./configure
+		make -j $NUM_CPUS
+		make install
+
+		echo "AHRL: Installing xwxapt - DONE"
+	fi
+}
+
+################################################################################
+# Function: install_yaac
+################################################################################
+
+install_yaac() {
+	if [ $INSTALL_YAAC -eq 1 ]; then
+		echo "AHRL: Installing yaac"
+
+		$APT_INSTALL default-jre-headless
+		$APT_INSTALL libjssc-java
+
+		SRC_FILE=YAAC.zip
+
+		cd $SRC_DIR
+
+		SRC_FILE_DIR=yaac
+		if [ -d "$SRC_FILE_DIR" ]; then
+			mkdir -p $DELETE_DIR
+			mv $SRC_FILE_DIR $DELETE_DIR
+		fi
+
+		mkdir -p yaac
+		cd yaac
+		unzip $TARBALL_DIR/$SRC_FILE
+
+		# create $BIN_DIR/start_yaac
+		SCRIPT=$BIN_DIR/start_yaac
+		rm -f $SCRIPT
+
+		echo "#!/bin/bash" >> $SCRIPT
+		echo ""  >> $SCRIPT
+		echo "java -jar $SRC_DIR/$SRC_FILE_DIR/YAAC.jar" >> $SCRIPT
+
+		chmod 755 $SCRIPT
+
+		echo "AHRL: Installing yaac - DONE"
+	fi
+}
+
+################################################################################
+# Function: purge_brltty
+#
+# This package often causes problems with serial adapters.
+################################################################################
+
+purge_brltty() {
+	echo "AHRL: purging package: brltty"
+	$APT_PURGE brltty
+	echo "AHRL: purging package: brltty - DONE"
+}
+
+################################################################################
+# Function: purge_xtrx_dkms
+#
+# This package has issues.  It seems harmless to remove it.  However,
+# sometimes it is a dependency of other packages which try again to install it.
+# Purging it over and over again is like playing "whack a mole".  Despite the
+# errors in out.txt, I have not seen any real problems.  AMS 25-May-2025
+################################################################################
+
+purge_xtrx_dkms() {
+	echo "AHRL: purging package: xtrx-dkms"
+	$APT_PURGE xtrx-dkms
+	echo "AHRL: purging package: xtrx-dkms - DONE"
+}
+
+#################################################################################
+# Start the real work here ...
+#################################################################################
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|--version)
+		echo $VERSION
+		exit
+		;;
+    -h|--help)
+		echo "Installer for \"Andy's Ham Radio Linux\"."
+		echo "Usage:  [-h --help] [-v --version] [-d --debug]"
+		exit
+		;;
+    -d|--debug)
+		echo "Debug OK"
+		exit
+		;;
+    -*|--*)
+		echo "Usage:  [-h --help] [-v --version] [-d --debug]"
+	        exit 1
+      ;;
+  esac
+done
+
+################################################################################
+# Perform sanity checks
+################################################################################
+
+check_root;
+check_arch;
+check_apt;
+
+check_storage;
+check_memory;
+check_network;
+
+################################################################################
+# Ensure that everything is up to date.
+################################################################################
+
+# Remove this problematic package on Raspberry Pi
+purge_xtrx_dkms;
+
+# Remove the brltty package, which causes problems for various serial adapters.
+purge_brltty;
+
+echo "AHRL: APT Updating the system"
+$APT_UPDATE
+echo "AHRL: APT Updating the system - DONE"
+
+echo "AHRL: APT Upgrading the system"
+$APT_UPGRADE
+echo "AHRL: APT Upgrading the system - DONE"
+
+echo "AHRL: Cleanup unneeded software"
+$APT_AUTOREMOVE
+echo "AHRL: Cleanup unneeded software - DONE"
+
+# Remove this problematic package on Raspberry Pi
+# Do this twice to ensure that the previous update/upgrades didn't reinstall it.
+purge_xtrx_dkms;
+
+echo "AHRL: Create necessary directories for source compilation"
+mkdir -p $SRC_DIR || (echo "AHRL: ERROR: mkdir failed unexpectedly - exiting."; exit)
+echo "AHRL: Create necessary directories for source compilation - DONE"
+
+#################################################################################
+# Some packages have slightly different names between Linux flavors.
+# Determine the correct package name for this Linux flavor.
+#################################################################################
+
+package_name "CHROMIUM" "chromium" "chromium-browser"
+package_name "LIBOSMOSDR" "libgnuradio-osmosdr0.2.0t64" "libgnuradio-osmosdr0.2.0"
+package_name "LIBVOLK" "libvolk-dev" "libvolk2-dev"
+
+#################################################################################
+# Install the software
+#################################################################################
+
+# Several packages depend on these, so install them first
+install_browser;
+install_libhamlib4;
+install_pipx;
+install_source_libs;
+install_wine;
+
+# Install the RTL SDR Blog V4 driver.
+install_rtl_sdr_v4_driver;
+
+# Run these functions here since they create groups to which the user must be added.
+install_svxlink;
+install_xastir;
+
+# Run these functions now since they prompt the user.
+get_username;
+install_dump1090_mutability;
+
+# These functions will execute without prompting the user.
+install_aa_analyzer;
+install_ais_catcher;
+install_antscope2;
+install_ardop;
+install_arduino;
+install_atlc;
+install_backdrops;
+install_chirp;
+install_coil64;
+install_cqrlog;
+install_cwwav;
+install_direwolf;
+install_dream;
+install_ebook2cwgui;
+install_esp_hamclock;
+install_flaa;
+install_flamp;
+install_flcluster;
+install_fldigi;
+install_fllog;
+install_flmoxgen;
+install_flmsg;
+install_flnet;
+install_flrig;
+install_flwkey;
+install_flwrap;
+install_foxtelem;
+install_freedv;
+install_fritzing;
+install_glfer;
+install_gnuradio;
+install_gpredict;
+install_gpsman;
+install_gqrx;
+install_gridtracker;
+install_grig;
+install_gsmc;
+install_gspiceui;
+install_ibp;
+install_js8call;
+install_js8spotter;
+install_jtdx;
+install_kicad;
+install_klog;
+install_linpac;
+install_linrad;
+install_mfc_gpl;
+install_morse_runner;
+install_mshv;
+install_mvoice;
+install_nanovna_saver;
+install_ngspice;
+install_noaa_apt;
+install_not1mm;
+install_notepadqq;
+install_open_wouxon;
+install_putty;
+install_pyautogui;
+install_qgrid;
+install_qlog;
+install_qrq;
+install_qsstv;
+install_qtel;
+install_qttinysa;
+install_quisk;
+install_rf_exposure_calc;
+install_satdump;
+install_sdr_plus_plus;
+install_solar_data;
+install_splat;
+install_sunclock;
+install_sylpheed;
+install_svxreflector;
+install_tqsl;
+install_tt3_gpl;
+install_virtual_radar_server;
+install_wfview;
+install_wordsworth;
+install_wsjtx;
+install_wsjtx_improved;
+install_wwl;
+install_xcwcp;
+install_xdx;
+install_xlog;
+install_xnec2c;
+install_xosview;
+install_xwefax;
+install_xwxapt;
+install_yaac;
+
+# Ensure that all programs get a copy of cty.dat
+install_country_files;
+
+# Install AHRL customizations
+install_ahrl_docs;
+install_ahrl_menus;
+install_ahrl_version;
+
+# Fix directory permissions
+chown -R root:root $BIN_DIR
+chown -R root:root $LOCAL_SHARE_DIR
+chown -R root:root $TARBALL_DIR
+
+cleanup_deleted_files;
+cleanup_unneeded_software;
+
+print_post_installation_suggestions;
+
+echo "AHRL: Installation - DONE"
